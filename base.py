@@ -26,6 +26,7 @@ class Ui_MainWindow(object):
         self.txt_nome = QtWidgets.QLineEdit(self.tab_5)
         self.txt_nome.setGeometry(QtCore.QRect(10, 40, 151, 21))
         self.txt_nome.setStyleSheet("background-color:rgb(254, 254, 254);")
+        self.txt_nome.setText("")
         self.txt_nome.setObjectName("txt_nome")
         self.label = QtWidgets.QLabel(self.tab_5)
         self.label.setGeometry(QtCore.QRect(10, 10, 31, 21))
@@ -34,14 +35,17 @@ class Ui_MainWindow(object):
         self.txt_estado = QtWidgets.QLineEdit(self.tab_5)
         self.txt_estado.setGeometry(QtCore.QRect(10, 220, 151, 21))
         self.txt_estado.setStyleSheet("background-color:rgb(254, 254, 254);")
+        self.txt_estado.setText("")
         self.txt_estado.setObjectName("txt_estado")
         self.txt_patrimonio = QtWidgets.QLineEdit(self.tab_5)
         self.txt_patrimonio.setGeometry(QtCore.QRect(10, 100, 151, 21))
         self.txt_patrimonio.setStyleSheet("background-color:rgb(254, 254, 254);")
+        self.txt_patrimonio.setText("")
         self.txt_patrimonio.setObjectName("txt_patrimonio")
         self.txt_email = QtWidgets.QLineEdit(self.tab_5)
         self.txt_email.setGeometry(QtCore.QRect(10, 160, 151, 21))
         self.txt_email.setStyleSheet("background-color:rgb(254, 254, 254);")
+        self.txt_email.setText("")
         self.txt_email.setObjectName("txt_email")
         self.label_2 = QtWidgets.QLabel(self.tab_5)
         self.label_2.setGeometry(QtCore.QRect(10, 70, 61, 21))
@@ -56,12 +60,19 @@ class Ui_MainWindow(object):
         self.label_4.setStyleSheet("font-famiy:\"MS Shell Dlg 2\";")
         self.label_4.setObjectName("label_4")
         self.Btn_botao1_2 = QtWidgets.QPushButton(self.tab_5)
-        self.Btn_botao1_2.setGeometry(QtCore.QRect(40, 290, 71, 31))
+        self.Btn_botao1_2.setGeometry(QtCore.QRect(10, 280, 71, 31))
         self.Btn_botao1_2.setStyleSheet("background-color:rgb(255, 255, 255);\n"
 "\n"
 "font-famiy:\"Small Fonts\";\n"
 "font-size: 12pt")
         self.Btn_botao1_2.setObjectName("Btn_botao1_2")
+        self.Btn_botao1_3 = QtWidgets.QPushButton(self.tab_5)
+        self.Btn_botao1_3.setGeometry(QtCore.QRect(90, 280, 71, 31))
+        self.Btn_botao1_3.setStyleSheet("background-color:rgb(255, 255, 255);\n"
+"\n"
+"font-famiy:\"Small Fonts\";\n"
+"font-size: 12pt")
+        self.Btn_botao1_3.setObjectName("Btn_botao1_3")
         self.tabWidget.addTab(self.tab_5, "")
         self.tab_3 = QtWidgets.QWidget()
         self.tab_3.setObjectName("tab_3")
@@ -85,15 +96,12 @@ class Ui_MainWindow(object):
     def retranslateUi(self, MainWindow):
         _translate = QtCore.QCoreApplication.translate
         MainWindow.setWindowTitle(_translate("MainWindow", "MainWindow"))
-        self.txt_nome.setText(_translate("MainWindow", "Giulia Nunes Vargas de Lima"))
         self.label.setText(_translate("MainWindow", "Nome"))
-        self.txt_estado.setText(_translate("MainWindow", "Rio de Janeiro"))
-        self.txt_patrimonio.setText(_translate("MainWindow", "Monitor"))
-        self.txt_email.setText(_translate("MainWindow", "giuliavargas2001@gmail.com"))
         self.label_2.setText(_translate("MainWindow", "Patrimonio"))
         self.label_3.setText(_translate("MainWindow", "E-mail"))
         self.label_4.setText(_translate("MainWindow", "Estado"))
         self.Btn_botao1_2.setText(_translate("MainWindow", "Exibir"))
+        self.Btn_botao1_3.setText(_translate("MainWindow", "..."))
         self.tabWidget.setTabText(self.tabWidget.indexOf(self.tab_5), _translate("MainWindow", "Page"))
         self.tabWidget.setTabText(self.tabWidget.indexOf(self.tab_3), _translate("MainWindow", "Tab 1"))
         self.tabWidget.setTabText(self.tabWidget.indexOf(self.tab_4), _translate("MainWindow", "Tab 2"))
