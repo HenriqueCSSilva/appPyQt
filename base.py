@@ -24,7 +24,7 @@ class Ui_MainWindow(object):
         self.tab_5 = QtWidgets.QWidget()
         self.tab_5.setObjectName("tab_5")
         self.txt_patrimonio = QtWidgets.QLineEdit(self.tab_5)
-        self.txt_patrimonio.setGeometry(QtCore.QRect(10, 21, 151, 21))
+        self.txt_patrimonio.setGeometry(QtCore.QRect(10, 21, 61, 21))
         self.txt_patrimonio.setStyleSheet("background-color:rgb(254, 254, 254);")
         self.txt_patrimonio.setText("")
         self.txt_patrimonio.setObjectName("txt_patrimonio")
@@ -59,21 +59,21 @@ class Ui_MainWindow(object):
         self.label_memoria.setGeometry(QtCore.QRect(12, 128, 51, 21))
         self.label_memoria.setStyleSheet("font-family:\"MS Shell Dlg 2\";")
         self.label_memoria.setObjectName("label_memoria")
-        self.Btn_botao_exibir = QtWidgets.QPushButton(self.tab_5)
-        self.Btn_botao_exibir.setGeometry(QtCore.QRect(12, 316, 41, 21))
-        self.Btn_botao_exibir.setStyleSheet("background-color:rgb(255, 255, 255);\n"
+        self.btn_buscar = QtWidgets.QPushButton(self.tab_5)
+        self.btn_buscar.setGeometry(QtCore.QRect(80, 21, 41, 21))
+        self.btn_buscar.setStyleSheet("background-color:rgb(255, 255, 255);\n"
 "font-family:\"Small Fonts\";\n"
 "\n"
 "font-size: 10pt")
-        self.Btn_botao_exibir.setObjectName("Btn_botao_exibir")
-        self.Btn_botao_3pontos = QtWidgets.QPushButton(self.tab_5)
-        self.Btn_botao_3pontos.setGeometry(QtCore.QRect(130, 316, 31, 21))
-        self.Btn_botao_3pontos.setStyleSheet("background-color:rgb(255, 255, 255);\n"
+        self.btn_buscar.setObjectName("btn_buscar")
+        self.btn_3pontos = QtWidgets.QPushButton(self.tab_5)
+        self.btn_3pontos.setGeometry(QtCore.QRect(130, 316, 31, 21))
+        self.btn_3pontos.setStyleSheet("background-color:rgb(255, 255, 255);\n"
 "\n"
 "font-family:\"Small Fonts\";\n"
 "font-size: 12pt\n"
 "")
-        self.Btn_botao_3pontos.setObjectName("Btn_botao_3pontos")
+        self.btn_3pontos.setObjectName("btn_3pontos")
         self.txt_status = QtWidgets.QLineEdit(self.tab_5)
         self.txt_status.setGeometry(QtCore.QRect(11, 191, 151, 21))
         self.txt_status.setStyleSheet("background-color:rgb(254, 254, 254);")
@@ -101,13 +101,13 @@ class Ui_MainWindow(object):
         self.label_status.setGeometry(QtCore.QRect(13, 170, 41, 21))
         self.label_status.setStyleSheet("font-family:\"MS Shell Dlg 2\";")
         self.label_status.setObjectName("label_status")
-        self.Btn_botao_mostrar = QtWidgets.QPushButton(self.tab_5)
-        self.Btn_botao_mostrar.setGeometry(QtCore.QRect(64, 316, 51, 21))
-        self.Btn_botao_mostrar.setStyleSheet("background-color:rgb(255, 255, 255);\n"
+        self.btn_mostrar = QtWidgets.QPushButton(self.tab_5)
+        self.btn_mostrar.setGeometry(QtCore.QRect(64, 316, 51, 21))
+        self.btn_mostrar.setStyleSheet("background-color:rgb(255, 255, 255);\n"
 "font-family:\"Small Fonts\";\n"
 "\n"
 "font-size: 10pt")
-        self.Btn_botao_mostrar.setObjectName("Btn_botao_mostrar")
+        self.btn_mostrar.setObjectName("btn_mostrar")
         self.tabWidget.addTab(self.tab_5, "")
         self.tab_3 = QtWidgets.QWidget()
         self.tab_3.setObjectName("tab_3")
@@ -135,12 +135,12 @@ class Ui_MainWindow(object):
         self.label_modelo.setText(_translate("MainWindow", "Modelo:"))
         self.label_processador.setText(_translate("MainWindow", "Processador:"))
         self.label_memoria.setText(_translate("MainWindow", "Memoria:"))
-        self.Btn_botao_exibir.setText(_translate("MainWindow", "Exibir"))
-        self.Btn_botao_3pontos.setText(_translate("MainWindow", "..."))
+        self.btn_buscar.setText(_translate("MainWindow", "Buscar"))
+        self.btn_3pontos.setText(_translate("MainWindow", "..."))
         self.label_setor.setText(_translate("MainWindow", "Setor:"))
         self.label_usuario.setText(_translate("MainWindow", "Usuario:"))
         self.label_status.setText(_translate("MainWindow", "Status:"))
-        self.Btn_botao_mostrar.setText(_translate("MainWindow", "Mostrar"))
+        self.btn_mostrar.setText(_translate("MainWindow", "Mostrar"))
         self.tabWidget.setTabText(self.tabWidget.indexOf(self.tab_5), _translate("MainWindow", "Page"))
         self.tabWidget.setTabText(self.tabWidget.indexOf(self.tab_3), _translate("MainWindow", "Tab 1"))
         self.tabWidget.setTabText(self.tabWidget.indexOf(self.tab_4), _translate("MainWindow", "Tab 2"))

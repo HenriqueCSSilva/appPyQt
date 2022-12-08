@@ -5,36 +5,66 @@ import sys
 import os
 import base
 import pandas as pd
-
+from  IPython.display import display 
 
 class Janela(QtWidgets.QMainWindow, base.Ui_MainWindow):
     def __init__(self, parent=None):
 
         super(Janela, self).__init__(parent)
         self.setupUi(self)
-        self.Btn_botao_exibir.clicked.connect(self.exibir) 
-        self.Btn_botao_3pontos.clicked.connect(self.abrirPasta)
-        self.Btn_botao_mostrar.clicked.connect(self.mostrar)
+        self.btn_buscar.clicked.connect(self.buscar) 
+        self.btn_3pontos.clicked.connect(self.abrirPasta)
+        self.btn_mostrar.clicked.connect(self.mostrar)
         
         
-    def exibir(self): # função botão exibir
+    def buscar(self): # função botão exibir
         
-        patrimonio = self.txt_patrimonio.text()
-        modelo = self.txt_modelo.text()
-        processador = self.txt_processador.text()
-        memoria = self.txt_memoria.text()
-        status = self.txt_status.text()
-        usuario = self.txt_usuario.text()
-        setor = self.txt_usuario.text()
-
-        campos = [patrimonio, modelo, processador, memoria, status, usuario, setor]
-
-        for item in campos:
-            if(item == '' or item == None):
-                QMessageBox.about(self, "AVISO" , "Campo vazio! \n" "por favor, preencha os campos")
-                return
-        else:
-            print (patrimonio,"\n",modelo,"\n",processador,"\n",memoria,"\n",status,"\n",status,"\n",usuario,"\n",setor)
+        try:
+            patrimonio_ver = self.txt_patrimonio.text()
+            
+            
+            if patrimonio_ver == '' or patrimonio_ver == None:
+                QMessageBox.about(self, "AVISO" , "Campo vazio! \n" "Por favor, preencha os campos")
+        
+            else:
+                path = os.getcwd() + '\\base_de_dados' + '\\basePatrimonio.xlsx'
+                tabela = pd.read_excel(path)
+                filtro = int(self.txt_patrimonio.text())
+                
+                tabela = tabela.query(f"patrimonio == {filtro}")
+                
+                if tabela.empty == False:
+                    
+                    print(tabela)
+                    modelo = tabela['modelo'][0]
+                    processador = tabela['processador'][0]
+                    memoria = tabela['memoria'][0]
+                    status = tabela['status'][0]
+                    usuario = tabela['usuario'][0]
+                    setor = tabela['setor'][0]
+                    
+                    self.txt_modelo.setText(modelo)
+                    self.txt_processador.setText(processador)
+                    self.txt_memoria.setText(memoria)
+                    self.txt_status.setText(status)
+                    self.txt_usuario.setText(usuario)
+                    self.txt_setor.setText(setor)
+                   
+                else:
+                     QMessageBox.about(self, "AVISO" , "Campo vazio! \n" "Patrimonio não encontrado")
+                     print(tabela)
+                    
+                    
+                   
+        except Exception as error:
+            print(error)       
+         
+        # for item in campos:
+        #     if(item == '' or item == None):
+        #         QMessageBox.about(self, "AVISO" , "Campo vazio! \n" "Por favor, preencha os campos")
+        #         return
+        # else:
+        #     print (patrimonio,"\n",modelo,"\n",processador,"\n",memoria,"\n",status,"\n",status,"\n",usuario,"\n",setor)
     
     def abrirPasta(self): # função botão ...
         path = os.getcwd() + '\\base_de_dados' 

@@ -5,4 +5,4 @@ pyuic5 base.ui -o base.py
 python -m pip install --upgrade pip
 
   git config --global user.email "giulia.arocontabil@gmail.com"
-  git config --global user.name "giulialimaa7"
+  git config --global user.name "giulialimaa7" 
