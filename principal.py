@@ -32,27 +32,32 @@ class Janela(QtWidgets.QMainWindow, base.Ui_MainWindow):
                 filtro = int(self.txt_patrimonio.text())
                 
                 tabela = tabela.query(f"patrimonio == {filtro}")
+                df= tabela
+                print( tabela['modelo'][0])
                 
                 if tabela.empty == False:
-                    
                     print(tabela)
-                    modelo = tabela['modelo'][0]
+                    
+                    modelo = str( tabela['modelo'][0])
+                    print( modelo  )
+                    
                     processador = tabela['processador'][0]
                     memoria = tabela['memoria'][0]
                     status = tabela['status'][0]
                     usuario = tabela['usuario'][0]
                     setor = tabela['setor'][0]
                     
-                    self.txt_modelo.setText(modelo)
-                    self.txt_processador.setText(processador)
-                    self.txt_memoria.setText(memoria)
-                    self.txt_status.setText(status)
-                    self.txt_usuario.setText(usuario)
-                    self.txt_setor.setText(setor)
+                    print('Entrou aqui')
+                    # self.txt_modelo.setText(modelo)
+                    # self.txt_processador.setText(processador)
+                    # self.txt_memoria.setText(memoria)
+                    # self.txt_status.setText(status)
+                    # self.txt_usuario.setText(usuario)
+                    # self.txt_setor.setText(setor)
                    
                 else:
-                     QMessageBox.about(self, "AVISO" , "Campo vazio! \n" "Patrimonio não encontrado")
-                     print(tabela)
+                    print('Entrou no Else')
+                    QMessageBox.about(self, "AVISO" , "Campo vazio! \n" "Patrimonio não encontrado")
                     
                     
                    

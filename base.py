@@ -130,7 +130,7 @@ class Ui_MainWindow(object):
 
     def retranslateUi(self, MainWindow):
         _translate = QtCore.QCoreApplication.translate
-        MainWindow.setWindowTitle(_translate("MainWindow", "MainWindow"))
+        MainWindow.setWindowTitle(_translate("MainWindow", "Controle TI"))
         self.label_patrimonio.setText(_translate("MainWindow", "Patrimonio:"))
         self.label_modelo.setText(_translate("MainWindow", "Modelo:"))
         self.label_processador.setText(_translate("MainWindow", "Processador:"))
