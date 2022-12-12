@@ -16,5 +16,3 @@ if tabela.empty:
 else:
     print('Preenchido')
     print(tabela)
-    
-

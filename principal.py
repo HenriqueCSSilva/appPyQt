@@ -1,6 +1,5 @@
 from PyQt5 import QtCore, QtGui, QtWidgets
-from PyQt5.QtWidgets import QApplication
-from PyQt5.QtWidgets import QMessageBox
+from PyQt5.QtWidgets import QApplication, QMessageBox
 import sys
 import os
 import base
@@ -15,61 +14,44 @@ class Janela(QtWidgets.QMainWindow, base.Ui_MainWindow):
         self.btn_buscar.clicked.connect(self.buscar) 
         self.btn_3pontos.clicked.connect(self.abrirPasta)
         self.btn_mostrar.clicked.connect(self.mostrar)
+        self.btn_limpar.clicked.connect(self.limpar)
         
         
     def buscar(self): # função botão exibir
-        
         try:
             patrimonio_ver = self.txt_patrimonio.text()
-            
-            
+             
             if patrimonio_ver == '' or patrimonio_ver == None:
                 QMessageBox.about(self, "AVISO" , "Campo vazio! \n" "Por favor, preencha os campos")
-        
+                
             else:
                 path = os.getcwd() + '\\base_de_dados' + '\\basePatrimonio.xlsx'
                 tabela = pd.read_excel(path)
+                
                 filtro = int(self.txt_patrimonio.text())
-                
                 tabela = tabela.query(f"patrimonio == {filtro}")
-                df= tabela
-                print( tabela['modelo'][0])
-                
+               
                 if tabela.empty == False:
-                    print(tabela)
                     
-                    modelo = str( tabela['modelo'][0])
-                    print( modelo  )
+                    modelo = list(tabela['modelo'])[0]
+                    processador = list(tabela['processador'])[0]
+                    memoria = list(tabela['memoria'])[0]
+                    status = list(tabela['status'])[0]
+                    usuario = list(tabela['usuario'])[0]
+                    setor = list(tabela['setor'])[0]
                     
-                    processador = tabela['processador'][0]
-                    memoria = tabela['memoria'][0]
-                    status = tabela['status'][0]
-                    usuario = tabela['usuario'][0]
-                    setor = tabela['setor'][0]
+                    self.txt_modelo.setText(modelo)
+                    self.txt_processador.setText(processador)
+                    self.txt_memoria.setText(memoria)
+                    self.txt_status.setText(status)
+                    self.txt_usuario.setText(usuario)
+                    self.txt_setor.setText(setor)
                     
-                    print('Entrou aqui')
-                    # self.txt_modelo.setText(modelo)
-                    # self.txt_processador.setText(processador)
-                    # self.txt_memoria.setText(memoria)
-                    # self.txt_status.setText(status)
-                    # self.txt_usuario.setText(usuario)
-                    # self.txt_setor.setText(setor)
-                   
                 else:
-                    print('Entrou no Else')
-                    QMessageBox.about(self, "AVISO" , "Campo vazio! \n" "Patrimonio não encontrado")
-                    
-                    
+                    QMessageBox.about(self, "AVISO", "Patrimonio não encontrado")    
                    
         except Exception as error:
             print(error)       
-         
-        # for item in campos:
-        #     if(item == '' or item == None):
-        #         QMessageBox.about(self, "AVISO" , "Campo vazio! \n" "Por favor, preencha os campos")
-        #         return
-        # else:
-        #     print (patrimonio,"\n",modelo,"\n",processador,"\n",memoria,"\n",status,"\n",status,"\n",usuario,"\n",setor)
     
     def abrirPasta(self): # função botão ...
         path = os.getcwd() + '\\base_de_dados' 
@@ -78,7 +60,21 @@ class Janela(QtWidgets.QMainWindow, base.Ui_MainWindow):
     def mostrar(self): # função botão mostar
         path = os.getcwd() + '\\base_de_dados' + '\\basePatrimonio.xlsx'
         tabela = pd.read_excel(path)
+        
         print(tabela)
+    
+    def limpar(self): # função botão limpar
+        # campos = [self.txt_patrimonio,self.txt_modelo,self.txt_processador,self.txt_memoria,self.txt_status,self.txt_usuario,self.txt_setor]
+        # for item in campos:
+        #     item.clear()
+        
+        self.txt_patrimonio.clear()
+        self.txt_modelo.clear()
+        self.txt_processador.clear()
+        self.txt_memoria.clear()
+        self.txt_status.clear()
+        self.txt_usuario.clear()
+        self.txt_setor.clear()
         
 def main():
     app = QApplication(sys.argv)
