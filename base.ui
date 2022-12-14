@@ -6,8 +6,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>617</width>
-    <height>417</height>
+    <width>727</width>
+    <height>422</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -19,7 +19,7 @@
      <rect>
       <x>0</x>
       <y>0</y>
-      <width>701</width>
+      <width>841</width>
       <height>411</height>
      </rect>
     </property>
@@ -27,7 +27,7 @@
      <string notr="true">background-color:rgb(167, 167, 167);</string>
     </property>
     <property name="currentIndex">
-     <number>1</number>
+     <number>0</number>
     </property>
     <widget class="QWidget" name="tab_geral">
      <attribute name="title">
@@ -161,14 +161,22 @@
        <string>Memoria:</string>
       </property>
      </widget>
-     <widget class="QPushButton" name="btn_buscar">
+     <widget class="QPushButton" name="btn_detalhes">
       <property name="geometry">
        <rect>
         <x>52</x>
         <y>22</y>
-        <width>41</width>
+        <width>51</width>
         <height>21</height>
        </rect>
+      </property>
+      <property name="font">
+       <font>
+        <family>Small Fonts</family>
+        <pointsize>8</pointsize>
+        <weight>75</weight>
+        <bold>true</bold>
+       </font>
       </property>
       <property name="styleSheet">
        <string notr="true">background-color:rgb(167, 167, 167);
@@ -184,11 +192,19 @@ font-size:75 10pt &quot;MS Shell Dlg 2&quot;;</string>
      <widget class="QPushButton" name="btn_3pontos">
       <property name="geometry">
        <rect>
-        <x>76</x>
+        <x>71</x>
         <y>310</y>
         <width>21</width>
         <height>21</height>
        </rect>
+      </property>
+      <property name="font">
+       <font>
+        <family>Small Fonts</family>
+        <pointsize>12</pointsize>
+        <weight>75</weight>
+        <bold>true</bold>
+       </font>
       </property>
       <property name="styleSheet">
        <string notr="true">background-color:rgb(167, 167, 167);
@@ -306,6 +322,14 @@ font-size: 12pt
         <height>21</height>
        </rect>
       </property>
+      <property name="font">
+       <font>
+        <family>Small Fonts</family>
+        <pointsize>10</pointsize>
+        <weight>75</weight>
+        <bold>true</bold>
+       </font>
+      </property>
       <property name="styleSheet">
        <string notr="true">background-color:rgb(167, 167, 167);
 font-family:&quot;Small Fonts&quot;;
@@ -319,11 +343,19 @@ font-size: 10pt</string>
      <widget class="QPushButton" name="btn_limpar">
       <property name="geometry">
        <rect>
-        <x>110</x>
+        <x>100</x>
         <y>310</y>
         <width>51</width>
         <height>21</height>
        </rect>
+      </property>
+      <property name="font">
+       <font>
+        <family>Small Fonts</family>
+        <pointsize>10</pointsize>
+        <weight>75</weight>
+        <bold>true</bold>
+       </font>
       </property>
       <property name="styleSheet">
        <string notr="true">background-color:rgb(167, 167, 167);
@@ -356,7 +388,7 @@ font-size: 10pt</string>
        <string>Nome:</string>
       </property>
      </widget>
-     <widget class="QLineEdit" name="txt_nome">
+     <widget class="QLineEdit" name="txt_nome_buscar">
       <property name="geometry">
        <rect>
         <x>20</x>
@@ -372,14 +404,21 @@ font-size: 10pt</string>
        <string/>
       </property>
      </widget>
-     <widget class="QPushButton" name="btn_buscar_2">
+     <widget class="QPushButton" name="btn_buscar_nome">
       <property name="geometry">
        <rect>
-        <x>117</x>
+        <x>109</x>
         <y>28</y>
-        <width>41</width>
+        <width>51</width>
         <height>21</height>
        </rect>
+      </property>
+      <property name="font">
+       <font>
+        <family>Small Fonts</family>
+        <weight>75</weight>
+        <bold>true</bold>
+       </font>
       </property>
       <property name="styleSheet">
        <string notr="true">background-color:rgb(167, 167, 167);
@@ -395,12 +434,27 @@ font-size:75 10pt &quot;MS Shell Dlg 2&quot;;</string>
      <widget class="QTableWidget" name="tableWidget">
       <property name="geometry">
        <rect>
-        <x>46</x>
-        <y>85</y>
-        <width>511</width>
-        <height>211</height>
+        <x>10</x>
+        <y>70</y>
+        <width>711</width>
+        <height>141</height>
        </rect>
       </property>
+      <row>
+       <property name="text">
+        <string>0</string>
+       </property>
+      </row>
+      <row>
+       <property name="text">
+        <string>1</string>
+       </property>
+      </row>
+      <row>
+       <property name="text">
+        <string>2</string>
+       </property>
+      </row>
       <column>
        <property name="text">
         <string>Patrimonio</string>
@@ -413,17 +467,27 @@ font-size:75 10pt &quot;MS Shell Dlg 2&quot;;</string>
       </column>
       <column>
        <property name="text">
-        <string>Usuario</string>
-       </property>
-      </column>
-      <column>
-       <property name="text">
         <string>Processador</string>
        </property>
       </column>
       <column>
        <property name="text">
         <string>Memoria</string>
+       </property>
+      </column>
+      <column>
+       <property name="text">
+        <string>Status</string>
+       </property>
+      </column>
+      <column>
+       <property name="text">
+        <string>Usuario</string>
+       </property>
+      </column>
+      <column>
+       <property name="text">
+        <string>Setor</string>
        </property>
       </column>
      </widget>
@@ -440,7 +504,7 @@ font-size:75 10pt &quot;MS Shell Dlg 2&quot;;</string>
     <rect>
      <x>0</x>
      <y>0</y>
-     <width>617</width>
+     <width>727</width>
      <height>21</height>
     </rect>
    </property>

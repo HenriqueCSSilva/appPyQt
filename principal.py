@@ -1,23 +1,24 @@
 from PyQt5 import QtCore, QtGui, QtWidgets
-from PyQt5.QtWidgets import QApplication, QMessageBox
+from PyQt5.QtWidgets import QApplication, QMessageBox, QTableWidgetItem
 import sys
 import os
 import base
 import pandas as pd
-from  IPython.display import display 
+
 
 class Janela(QtWidgets.QMainWindow, base.Ui_MainWindow):
     def __init__(self, parent=None):
 
         super(Janela, self).__init__(parent)
         self.setupUi(self)
-        self.btn_buscar.clicked.connect(self.buscar) 
+        self.btn_detalhes.clicked.connect(self.detalhes_usuario) 
         self.btn_3pontos.clicked.connect(self.abrirPasta)
         self.btn_mostrar.clicked.connect(self.mostrar)
         self.btn_limpar.clicked.connect(self.limpar)
+        self.btn_buscar_nome.clicked.connect(self.buscar)
         
         
-    def buscar(self): # função botão exibir
+    def detalhes_usuario(self): # função botão exibir
         try:
             patrimonio_ver = self.txt_patrimonio.text()
              
@@ -64,6 +65,7 @@ class Janela(QtWidgets.QMainWindow, base.Ui_MainWindow):
         print(tabela)
     
     def limpar(self): # função botão limpar
+        
         # campos = [self.txt_patrimonio,self.txt_modelo,self.txt_processador,self.txt_memoria,self.txt_status,self.txt_usuario,self.txt_setor]
         # for item in campos:
         #     item.clear()
@@ -76,6 +78,25 @@ class Janela(QtWidgets.QMainWindow, base.Ui_MainWindow):
         self.txt_usuario.clear()
         self.txt_setor.clear()
         
+    def buscar(self): # botão buscar (aba pesquisa)
+
+        
+        path = os.getcwd() + '\\base_de_dados' + '\\basePatrimonio.xlsx'
+        tabela = pd.read_excel(path)
+        
+        filtro = self.txt_nome_buscar.text() #Substituir pelo campo de texto
+        item = tabela[tabela["usuario"].str.contains(filtro, na=False)]          
+                
+        for linha in range(self.tableWidget.rowCount()):
+            
+            for coluna in range(self.tableWidget.columnCount()): 
+                
+                if linha == 2:
+                    return
+            
+                x = item.iloc[linha,coluna] 
+                self.tableWidget.setItem(linha, coluna, QTableWidgetItem(x))
+                        
 def main():
     app = QApplication(sys.argv)
     form = Janela()
