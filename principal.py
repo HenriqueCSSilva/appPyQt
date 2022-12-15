@@ -11,14 +11,16 @@ class Janela(QtWidgets.QMainWindow, base.Ui_MainWindow):
 
         super(Janela, self).__init__(parent)
         self.setupUi(self)
+        
         self.btn_detalhes.clicked.connect(self.detalhes_usuario) 
         self.btn_3pontos.clicked.connect(self.abrirPasta)
         self.btn_mostrar.clicked.connect(self.mostrar)
         self.btn_limpar.clicked.connect(self.limpar)
         self.btn_buscar_nome.clicked.connect(self.buscar)
+        self.btn_limpar_nome.clicked.connect(self.limparN)
         
         
-    def detalhes_usuario(self): # função botão exibir
+    def detalhes_usuario(self): #botão exibir
         try:
             patrimonio_ver = self.txt_patrimonio.text()
              
@@ -54,49 +56,51 @@ class Janela(QtWidgets.QMainWindow, base.Ui_MainWindow):
         except Exception as error:
             print(error)       
     
-    def abrirPasta(self): # função botão ...
+    def abrirPasta(self): #botão ...
         path = os.getcwd() + '\\base_de_dados' 
         os.startfile(path)
 
-    def mostrar(self): # função botão mostar
+    def mostrar(self): #botão mostrar (tabela) 
         path = os.getcwd() + '\\base_de_dados' + '\\basePatrimonio.xlsx'
         tabela = pd.read_excel(path)
         
         print(tabela)
     
-    def limpar(self): # função botão limpar
+    def limpar(self): #botão limpar (aba geral)
         
-        # campos = [self.txt_patrimonio,self.txt_modelo,self.txt_processador,self.txt_memoria,self.txt_status,self.txt_usuario,self.txt_setor]
-        # for item in campos:
-        #     item.clear()
-        
-        self.txt_patrimonio.clear()
-        self.txt_modelo.clear()
-        self.txt_processador.clear()
-        self.txt_memoria.clear()
-        self.txt_status.clear()
-        self.txt_usuario.clear()
-        self.txt_setor.clear()
+        campos = [self.txt_patrimonio,self.txt_modelo,self.txt_processador,self.txt_memoria,self.txt_status,self.txt_usuario,self.txt_setor]
+        for item in campos:
+            item.clear()
         
     def buscar(self): # botão buscar (aba pesquisa)
 
-        
         path = os.getcwd() + '\\base_de_dados' + '\\basePatrimonio.xlsx'
         tabela = pd.read_excel(path)
         
-        filtro = self.txt_nome_buscar.text() #Substituir pelo campo de texto
-        item = tabela[tabela["usuario"].str.contains(filtro, na=False)]          
-                
-        for linha in range(self.tableWidget.rowCount()):
+        filtro = self.txt_nome_buscar.text()       
+    
+        if (filtro == '' or filtro == None):
             
-            for coluna in range(self.tableWidget.columnCount()): 
-                
-                if linha == 2:
-                    return
+            QMessageBox.about(self, "AVISO" , "Campo vazio! \n" "Por favor, preencha o campo de busca")  
+
+        else:
             
-                x = item.iloc[linha,coluna] 
-                self.tableWidget.setItem(linha, coluna, QTableWidgetItem(x))
-                        
+            tabela = tabela[tabela["usuario"].str.contains(filtro, na=False)]
+            
+            for linha in range(self.tableWidget.rowCount()):
+    
+                for coluna in range(self.tableWidget.columnCount()): 
+            
+                    if linha == 2:
+                        return
+        
+                    self.x = tabela.iloc[linha,coluna] 
+                    self.tableWidget.setItem(linha, coluna, QTableWidgetItem(str(self.x)))
+    
+    def limparN(self): #botão limpar (aba pesquisa)
+        self.txt_nome_buscar.clear()
+        self.tableWidget.clear()
+                              
 def main():
     app = QApplication(sys.argv)
     form = Janela()
