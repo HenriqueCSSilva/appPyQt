@@ -67,7 +67,6 @@ class Janela(QtWidgets.QMainWindow, base.Ui_MainWindow):
         print(tabela)
     
     def limpar(self): #botão limpar (aba geral)
-        
         campos = [self.txt_patrimonio,self.txt_modelo,self.txt_processador,self.txt_memoria,self.txt_status,self.txt_usuario,self.txt_setor]
         for item in campos:
             item.clear()
@@ -75,14 +74,12 @@ class Janela(QtWidgets.QMainWindow, base.Ui_MainWindow):
     def buscar(self): # botão buscar (aba pesquisa)
         path = os.getcwd() + '\\base_de_dados' + '\\basePatrimonio.xlsx'
         tabela = pd.read_excel(path)
-     
-        
         filtro = self.txt_nome_buscar.text()     
         if (filtro == '' or filtro == None):
             QMessageBox.about(self, "AVISO" , "Campo vazio! \n" "Por favor, preencha o campo de busca")  
         else:
-            
             tabela =tabela[tabela["usuario"].str.contains(filtro, na=False)]
+            
             linha = 0
             for linha_indice in (tabela.index):
                 coluna = 0
@@ -92,8 +89,6 @@ class Janela(QtWidgets.QMainWindow, base.Ui_MainWindow):
                     self.tableWidget.setItem( linha, coluna , QTableWidgetItem(str(self.x))  )
                     coluna = coluna +1
                 linha = linha + 1
-            
-    
     
     def limparN(self): #botão limpar (aba pesquisa)
         self.txt_nome_buscar.clear()
