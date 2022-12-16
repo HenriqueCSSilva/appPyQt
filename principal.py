@@ -71,31 +71,29 @@ class Janela(QtWidgets.QMainWindow, base.Ui_MainWindow):
         campos = [self.txt_patrimonio,self.txt_modelo,self.txt_processador,self.txt_memoria,self.txt_status,self.txt_usuario,self.txt_setor]
         for item in campos:
             item.clear()
-        
-    def buscar(self): # botão buscar (aba pesquisa)
 
+    def buscar(self): # botão buscar (aba pesquisa)
         path = os.getcwd() + '\\base_de_dados' + '\\basePatrimonio.xlsx'
         tabela = pd.read_excel(path)
+     
         
-        filtro = self.txt_nome_buscar.text()       
-    
+        filtro = self.txt_nome_buscar.text()     
         if (filtro == '' or filtro == None):
-            
             QMessageBox.about(self, "AVISO" , "Campo vazio! \n" "Por favor, preencha o campo de busca")  
-
         else:
             
-            tabela = tabela[tabela["usuario"].str.contains(filtro, na=False)]
-            
-            for linha in range(self.tableWidget.rowCount()):
-    
-                for coluna in range(self.tableWidget.columnCount()): 
-            
-                    if linha == 2:
-                        return
-        
+            tabela =tabela[tabela["usuario"].str.contains(filtro, na=False)]
+            linha = 0
+            for linha_indice in (tabela.index):
+                coluna = 0
+                for item in tabela:
+                    print(linha_indice, linha , coluna, item)
                     self.x = tabela.iloc[linha,coluna] 
-                    self.tableWidget.setItem(linha, coluna, QTableWidgetItem(str(self.x)))
+                    self.tableWidget.setItem( linha, coluna , QTableWidgetItem(str(self.x))  )
+                    coluna = coluna +1
+                linha = linha + 1
+            
+    
     
     def limparN(self): #botão limpar (aba pesquisa)
         self.txt_nome_buscar.clear()
