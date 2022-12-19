@@ -4,7 +4,25 @@ import os
 path = os.getcwd() + '\\base_de_dados' + '\\basePatrimonio.xlsx'
 tabela = pd.read_excel(path)
 
-    # for linha range(self.tableWidget.columnRoum()):
+# linha = 0
+# coluna = 0
+# tabela = []
+
+# for linha in tabela:
+#     while tablewidget.rowCount() <= tabela.rowCount():
+#         for coluna in tabela:
+#             while tableWidget.columnCount()<= tabela.columnCount():
+            
+#                 self.x = tabela.iloc[linha,coluna]
+#                 self.tableWidget.setItem(linha,coluna, QTableWidgetItem(str(self.x)))
+                
+#         coluna+=1
+        
+# linha+=1
+
+
+
+    # for linha range(self.tableWidget.rowCount()):
     
         # for coluna in range(self.tableWidget.columnCount()): 
             
@@ -35,14 +53,3 @@ tabela = pd.read_excel(path)
             # self.txt_status.clear()
             # self.txt_usuario.clear()
             # self.txt_setor.clear()
-filtro = 169
-tabela= tabela.query(f"patrimonio == {filtro}")
-
-print(tabela.empty)
-
-if tabela.empty:
-    print('E vazio')
-    print(tabela)
-else:
-    print('Preenchido')
-    print(tabela)

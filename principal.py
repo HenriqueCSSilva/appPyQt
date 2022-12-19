@@ -5,7 +5,6 @@ import os
 import base
 import pandas as pd
 
-
 class Janela(QtWidgets.QMainWindow, base.Ui_MainWindow):
     def __init__(self, parent=None):
 
@@ -74,20 +73,29 @@ class Janela(QtWidgets.QMainWindow, base.Ui_MainWindow):
     def buscar(self): # botão buscar (aba pesquisa)
         path = os.getcwd() + '\\base_de_dados' + '\\basePatrimonio.xlsx'
         tabela = pd.read_excel(path)
-        filtro = self.txt_nome_buscar.text()     
+        
+        filtro = self.txt_nome_buscar.text()  
+           
         if (filtro == '' or filtro == None):
-            QMessageBox.about(self, "AVISO" , "Campo vazio! \n" "Por favor, preencha o campo de busca")  
-        else:
-            tabela =tabela[tabela["usuario"].str.contains(filtro, na=False)]
             
+            QMessageBox.about(self, "AVISO" , "Campo vazio! \n" "Por favor, preencha o campo de busca")  
+            
+        else:
+            
+            tabela =tabela[tabela["usuario"].str.contains(filtro, na=False)]
             linha = 0
+            
             for linha_indice in (tabela.index):
+                
                 coluna = 0
+                
                 for item in tabela:
+                    
                     print(linha_indice, linha , coluna, item)
                     self.x = tabela.iloc[linha,coluna] 
-                    self.tableWidget.setItem( linha, coluna , QTableWidgetItem(str(self.x))  )
+                    self.tableWidget.setItem( linha, coluna, QTableWidgetItem(str(self.x)))
                     coluna = coluna +1
+                    
                 linha = linha + 1
     
     def limparN(self): #botão limpar (aba pesquisa)
