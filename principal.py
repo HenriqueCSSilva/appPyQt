@@ -4,6 +4,7 @@ import sys
 import os
 import base
 import pandas as pd
+import pymysql
 
 class Janela(QtWidgets.QMainWindow, base.Ui_MainWindow):
     def __init__(self, parent=None):
@@ -20,19 +21,23 @@ class Janela(QtWidgets.QMainWindow, base.Ui_MainWindow):
         
         
     def detalhes_usuario(self): #botão exibir
+        conn = pymysql.connect(host='satelpjceara.com',port=3306, user='satelp03_marcosh'  ,password='12345678', db='satelp03_bd_github')
+        cur = conn.cursor()
+        
         try:
             patrimonio_ver = self.txt_patrimonio.text()
-             
+            
             if patrimonio_ver == '' or patrimonio_ver == None:
                 QMessageBox.about(self, "AVISO" , "Campo vazio! \n" "Por favor, preencha os campos")
                 
             else:
-                path = os.getcwd() + '\\base_de_dados' + '\\basePatrimonio.xlsx'
-                tabela = pd.read_excel(path)
-                
                 filtro = int(self.txt_patrimonio.text())
-                tabela = tabela.query(f"patrimonio == {filtro}")
-               
+                
+                query = f"select * from tb_base_patrimonio where patrimonio = {filtro}"
+                tabela = pd.read_sql(query, conn)
+                # ----------------------------------------------------------------
+                #tabela = tabela.query(f"patrimonio == {filtro}")
+            
                 if tabela.empty == False:
                     
                     modelo = list(tabela['modelo'])[0]
@@ -51,10 +56,10 @@ class Janela(QtWidgets.QMainWindow, base.Ui_MainWindow):
                     
                 else:
                     QMessageBox.about(self, "AVISO", "Patrimonio não encontrado")    
-                   
+                
         except Exception as error:
-            print(error)       
-    
+            print(error)
+                
     def abrirPasta(self): #botão ...
         path = os.getcwd() + '\\base_de_dados' 
         os.startfile(path)
@@ -73,6 +78,10 @@ class Janela(QtWidgets.QMainWindow, base.Ui_MainWindow):
     def buscar(self): # botão buscar (aba pesquisa)
         path = os.getcwd() + '\\base_de_dados' + '\\basePatrimonio.xlsx'
         tabela = pd.read_excel(path)
+        
+        tabela = pd.read_sql()
+        
+        
         
         filtro = self.txt_nome_buscar.text()  
            
