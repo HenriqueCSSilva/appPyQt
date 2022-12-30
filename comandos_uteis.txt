@@ -1,0 +1,11 @@
+python -m venv venv
+.\venv\Scripts\Activate.ps1
+pyuic5 base.ui -o base.py
+
+python -m pip install --upgrade pip
+pip install pandas
+pip install openpyxl
+pip install pyqt5
+
+git config --global user.email "giulia.arocontabil@gmail.com"
+git config --global user.name "giulialimaa7" 
