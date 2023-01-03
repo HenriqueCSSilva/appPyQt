@@ -20,7 +20,7 @@ class Janela(QtWidgets.QMainWindow, base.Ui_MainWindow):
         self.btn_alterar.clicked.connect(self.alterar)
         self.btn_cadastrar.clicked.connect(self.cadastrar)
         
-        self.btn_buscar_nome.clicked.connect(self.buscar)
+        self.btn_buscar_nome.clicked.connect(self.buscarN)
         self.btn_limpar_nome.clicked.connect(self.limparN)
         
         
@@ -39,8 +39,6 @@ class Janela(QtWidgets.QMainWindow, base.Ui_MainWindow):
                 
                 query = f"select * from tb_base_patrimonio where patrimonio = {filtro}"
                 tabela = pd.read_sql(query, conn)
-                # ----------------------------------------------------------------
-                #tabela = tabela.query(f"patrimonio == {filtro}")
             
                 if tabela.empty == False:
                     
@@ -133,16 +131,10 @@ class Janela(QtWidgets.QMainWindow, base.Ui_MainWindow):
         
         conn = pymysql.connect(host='satelpjceara.com',port=3306, user='satelp03_marcosh' ,password='12345678', db='satelp03_bd_github')
         cur = conn.cursor()
-        
-        sql_id = f"select * from  tb_base_patrimonio WHERE patrimonio = {campos['patrimonio']} "
-        meu_id = pd.read_sql(sql_id, conn)
-        meu_id = meu_id['id'][0]
       
-        
-        query_delete = f"""DELETE FROM tb_base_patrimonio WHERE (id =  {meu_id}); """                    
-        print(query_delete)
-    
-        if f.se_vazio(meu_id) == False:
+        query_delete = f"""DELETE FROM satelp03_bd_github.tb_base_patrimonio WHERE patrimonio = {campos['patrimonio']};"""                    
+
+        if f.se_vazio(campos) == False:
             try:
                 print(query_delete)
                 cur.execute(query_delete) #executa (raiozinho)
@@ -167,8 +159,7 @@ class Janela(QtWidgets.QMainWindow, base.Ui_MainWindow):
 
 
     #ABA PESQUISA
-    
-    def buscar(self): # botão buscar (ABA PESQUISA)
+    def buscarN(self): # botão buscar (ABA PESQUISA)
         filtro = self.txt_nome_buscar.text()  
         
         conn = pymysql.connect(host='satelpjceara.com',port=3306, user='satelp03_marcosh'  ,password='12345678', db='satelp03_bd_github')

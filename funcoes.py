@@ -17,7 +17,6 @@ def se_vazio(dicionario):
         indice = dicionario[item]
         
         if(indice == '' or indice == None):
-            
             verifc = True #se for = true é == de vazio
             
     
