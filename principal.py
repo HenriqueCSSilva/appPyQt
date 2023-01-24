@@ -23,8 +23,15 @@ class Janela(QtWidgets.QMainWindow, base.Ui_MainWindow):
         self.btn_buscar_nome.clicked.connect(self.buscarN)
         self.btn_limpar_nome.clicked.connect(self.limparN)
         
-        
-    def detalhes_usuario(self): #botão buscar
+        self.btn_buscar_detalhes_2.clicked.connect(self.detalhes_equipamentos)
+        self.btn_limpar_detalhes_2.clicked.connect(self.limpar2)
+        self.btn_cadastrar_2.clicked.connect(self.cadastrar_equipamentos)
+        self.btn_alterar_2.clicked.connect(self.alterar_equipamentos)
+        self.btn_apagar_2.clicked.connect(self.apagar_equipamentos)
+    
+    
+    #PAGE GERAL    
+    def detalhes_usuario(self): 
         conn = pymysql.connect(host='satelpjceara.com',port=3306, user='satelp03_marcosh'  ,password='12345678', db='satelp03_bd_github')
         cur = conn.cursor()
     
@@ -35,53 +42,175 @@ class Janela(QtWidgets.QMainWindow, base.Ui_MainWindow):
                 QMessageBox.about(self, "AVISO" , "Campo vazio! \n" "Por favor, preencha o campo de busca")
                 
             else:
-                filtro = int(self.txt_patrimonio.text())
+                filtro = int( self.txt_patrimonio.text() )
                 
                 query = f"select * from tb_base_patrimonio where patrimonio = {filtro}"
                 tabela = pd.read_sql(query, conn)
             
                 if tabela.empty == False:
+            
+                    tipo_item = list( tabela[ 'tipo_item' ] )[0]
+                    posto_trabalho = list( tabela[ 'posto_trabalho' ] )[0]
+                    descricao = list( tabela[ 'descricao' ] )[0]
                     
-                    modelo = list(tabela['modelo'])[0]
-                    processador = list(tabela['processador'])[0]
-                    memoria = list(tabela['memoria'])[0]
-                    status = list(tabela['status'])[0]
-                    usuario = list(tabela['usuario'])[0]
-                    setor = list(tabela['setor'])[0]
-                    n_modelo = list(tabela['n_modelo'])[0]
-                    n_serie = list(tabela['n_serie'])[0]
-                    tipo_contrato = list(tabela['tipo_contrato'])[0]
+                    uf = list( tabela[ 'uf' ] )[0]
+                    if list( tabela[ 'uf' ] )[0] == 'RJ':
+                        indexUf = 0
+                    if list( tabela[ 'uf' ] )[0] == 'RJ - NITEROI':
+                        indexUf = 1
+                    if list( tabela[ 'uf' ] )[0] == 'SP':
+                        indexUf = 2    
+                    if list( tabela[ 'uf' ] )[0] == 'GO':
+                        indexUf = 3
+                    if list( tabela[ 'uf' ] )[0] == 'AC':
+                        indexUf = 4
+                    if list( tabela[ 'uf' ] )[0] == 'RO':
+                        indexUf = 5
+                    if list( tabela[ 'uf' ] )[0] == 'MG':
+                        indexUf = 6
+                    if list( tabela[ 'uf' ] )[0] == 'CE':
+                        indexUf = 7
+                    if list( tabela[ 'uf' ] )[0] == 'PE':
+                        indexUf = 8
+                           
+                    id_usuario = list( tabela[ 'id_usuario' ] )[0]
+                
+                    setor = list( tabela['setor'] )[0]
+                    if list( tabela[ 'setor' ] )[0] == 'Analise de Projetos':
+                        indexSetor =  0 
+                    if list( tabela[ 'setor' ] )[0] == 'Projetos AT':
+                        indexSetor =  1 
+                    if list( tabela[ 'setor' ] )[0] == 'Projetos MT-BT':
+                        indexSetor =  2 
+                    if list( tabela[ 'setor' ] )[0] == 'Fiscalizacao':
+                        indexSetor =  3 
+                    if list( tabela[ 'setor' ] )[0] == 'Financeiro':
+                        indexSetor =  4 
+                    if list( tabela[ 'setor' ] )[0] == 'Recursos Humanos':
+                        indexSetor =  5 
+                    if list( tabela[ 'setor' ] )[0] == 'COM':
+                        indexSetor =  6 
+                    if list( tabela[ 'setor' ] )[0] == 'Seguranca do Trabalho':
+                        indexSetor =  7 
+                    if list( tabela[ 'setor' ] )[0] == 'Administrativo':
+                        indexSetor =  8 
+                    if list( tabela[ 'setor' ] )[0] == 'TI':
+                        indexSetor =  9 
                     
-                    self.txt_modelo.setText(modelo)
-                    self.txt_processador.setText(processador)
-                    self.txt_memoria.setText(memoria)
-                    self.txt_status.setText(status)
-                    self.txt_usuario.setText(usuario)
-                    self.txt_setor.setText(setor)
-                    self.txt_n_modelo.setText(n_modelo)
-                    self.txt_n_serie.setText(n_serie)
-                    self.txt_tipo_contrato.setText(tipo_contrato)
+                    modelo = list( tabela [ 'modelo' ] )[0]
+                    marca = list( tabela [ 'marca' ] )[0]
+                    n_modelo = list( tabela [ 'n_modelo' ] )[0]
+                    processador = list( tabela [ 'processador' ] )[0]
+                    n_serie = list( tabela [ 'n_serie' ] )[0]
+                    email = list( tabela [ 'email' ] )[0]
+                    memoria = list( tabela [ 'memoria' ] )[0]
+                    
+                    status = list( tabela [ 'status' ] )[0]
+                    if list( tabela [ 'status' ] )[0] == 'Ativo':
+                        indexStatus = 0
+                    if list( tabela [ 'status' ] )[0] == 'Inativo':
+                        indexStatus = 1
+                        
+                    condicoes = list( tabela [ 'condicoes' ] )[0]
+                    
+                    alugado = list( tabela [ 'alugado' ] )[0]
+                    if list( tabela [ 'alugado' ] )[0] == 'Sim':
+                        indexAlugado = 0
+                    if list( tabela [ 'alugado' ] )[0] == 'Não':
+                        indexAlugado = 1
+                        
+                    ssd_hdd = list( tabela[ 'ssd_hdd' ] )[0]
+                    if list( tabela[ 'ssd_hdd' ] )[0] == 'SSD':
+                        indexSSD = 0
+                    if list( tabela[ 'ssd_hdd' ] )[0] == 'HDD':
+                        indexSSD = 1
+                    if list( tabela[ 'ssd_hdd' ] )[0] == 'Ambos':
+                        indexSSD = 2
+                    
+                    windows = list( tabela[ 'windows' ] )[0]
+                    anydesk = list( tabela[ 'anydesk' ] )[0]
+                    
+                    officie = list( tabela[ 'officie' ] )[0]
+                    if list( tabela[ 'officie' ] )[0] == 'Sim':
+                        indexOfficie = 0
+                    if list( tabela[ 'officie' ] )[0] == 'Não':
+                        indexOfficie = 1
+                        
+                    tipo_officie = list( tabela[ 'tipo_officie' ] )[0]
+                    if list( tabela[ 'tipo_officie' ] )[0] == '365':
+                        indexTipoOfficie = 0
+                    if list( tabela[ 'tipo_officie' ] )[0] == 'Home & Business':
+                        indexTipoOfficie = 1
+                    if list( tabela[ 'tipo_officie' ] )[0] == 'Standard':
+                        indexTipoOfficie = 2
+                    
+                    conta = list( tabela[ 'conta' ] )[0]        
+                    chave = list( tabela[ 'chave' ] )[0]
+                    licenca = list( tabela[ 'licenca' ] )[0] 
+                    
+                    self.txt_tipo_item.setText( tipo_item )
+                    self.txt_posto_trabalho.setText( posto_trabalho )
+                    self.txt_descricao.setText( descricao )
+                    
+                    self.ddl_uf.setCurrentIndex( indexUf )
+                    
+                    self.txt_id_usuario.setText( id_usuario )
+                    
+                    self.ddl_setor.setCurrentIndex( indexSetor )
+                    
+                    self.txt_modelo.setText( modelo )
+                    self.txt_marca.setText( marca )
+                    self.txt_n_modelo.setText( n_modelo )
+                    self.txt_processador.setText( processador )
+                    self.txt_n_serie.setText( n_serie )
+                    self.txt_email.setText( email )
+                    self.txt_memoria.setText( memoria )
+                    
+                    self.ddl_status.setCurrentIndex( indexStatus )
+                    
+                    self.txt_condicoes.setText( condicoes )
+                    
+                    self.ddl_alugado.setCurrentIndex( indexAlugado )
+                    self.ddl_ssd_hdd.setCurrentIndex( indexSSD )
+                    
+                    
+                    self.txt_windows.setText( windows )
+                    self.txt_anydesk.setText( anydesk )
+                    
+                    self.ddl_officie.setCurrentIndex( indexOfficie )
+                    self.ddl_tipo_officie.setCurrentIndex( indexTipoOfficie )
+                    
+                    self.txt_conta.setText( conta )
+                    self.txt_chave.setText( chave )
+                    self.txt_licenca.setText( licenca )
                     
                 else:
                     QMessageBox.about(self, "FALHA", "Patrimonio não encontrado!")    
                 
         except Exception as error:
             print(error)
-            
     
-    def cadastrar(self): #botão cadastrar        
-        campos = {'patrimonio': self.txt_patrimonio.text(),'modelo':self.txt_modelo.text(),'processador':self.txt_processador.text(),'memoria':self.txt_memoria.text(),
-                'status':self.txt_status.text(),'usuario':self.txt_usuario.text(),'setor':self.txt_setor.text(),'n_modelo':self.txt_n_modelo.text(),'n_serie':self.txt_n_serie.text(), 
-                'tipo_contrato':self.txt_tipo_contrato.text()}
+    #PAGE GERAL    
+    def cadastrar(self):        
+        campos = { 'patrimonio': self.txt_patrimonio.text(), 'tipo_item':self.txt_tipo_item.text(), 'posto_trabalho':self.txt_posto_trabalho.text(), 'descricao':self.txt_descricao.text(), 
+                 'uf':self.ddl_uf.currentText(),'id_usuario':self.txt_id_usuario.text(), 'setor':self.ddl_setor.currentText(), 'modelo':self.txt_modelo.text(), 'marca':self.txt_marca.text(), 
+                 'n_modelo':self.txt_n_modelo.text(), 'processador':self.txt_processador.text(), 'n_serie':self.txt_n_serie.text(), 'email':self.txt_email.text(), 
+                 'memoria':self.txt_memoria.text(), 'status':self.ddl_status.currentText(), 'condicoes':self.txt_condicoes.text(), 'alugado':self.ddl_alugado.currentText(), 
+                 'ssd_hdd':self.ddl_ssd_hdd.currentText(), 'windows':self.txt_windows.text(), 'anydesk':self.txt_anydesk.text(), 'officie':self.ddl_officie.currentText(),
+                 'tipo_officie':self.ddl_tipo_officie.currentText(), 'conta':self.txt_conta.text(), 'chave':self.txt_chave.text(), 'licenca':self.txt_licenca.text() }
 
         conn = pymysql.connect(host='satelpjceara.com',port=3306, user='satelp03_marcosh' ,password='12345678', db='satelp03_bd_github')
         cur = conn.cursor()
         
-        if f.se_vazio(campos) == False: 
+        if f.se_vazio( campos ) == False: 
             try:
-                query_insert = f"""INSERT INTO tb_base_patrimonio (patrimonio, usuario, setor, modelo, processador, memoria, status, n_modelo, n_serie, tipo_contrato) 
-                                    VALUES ({campos['patrimonio']}, '{campos['usuario']}', '{campos['setor']}', '{campos['modelo']}', '{campos['processador']}', 
-                                    '{campos['memoria']}', '{campos['status']}', '{campos['n_modelo']}', '{campos['n_serie']}', '{campos['tipo_contrato']}')"""
+                query_insert = f"""INSERT INTO satelp03_bd_github.tb_base_patrimonio( patrimonio, tipo_item, posto_trabalho, descricao, uf, id_usuario, setor, modelo, marca, n_modelo, 
+                                processador, n_serie, email, memoria, status, condicoes, alugado, ssd_hdd, windows, anydesk, officie, tipo_officie, conta, chave, licenca ) 
+                                VALUES ( { campos['patrimonio'] }, '{ campos['tipo_item'] }', '{ campos['posto_trabalho']}', '{ campos['descricao'] }', '{ campos['uf'] }', '{ campos['id_usuario'] }', 
+                                '{ campos[ 'setor' ] }', '{ campos['modelo'] }', '{ campos['marca'] }', '{ campos['n_modelo'] }', '{ campos['processador'] }', '{ campos['n_serie'] }', 
+                                '{ campos['email'] }', '{ campos['memoria'] }', '{ campos['status'] }', '{ campos['condicoes'] }', '{ campos['alugado'] }', '{ campos['ssd_hdd'] }', 
+                                '{ campos['windows'] }', '{ campos['anydesk'] }','{ campos['officie'] }', '{ campos['tipo_officie'] }', '{ campos['conta'] }', '{ campos['chave'] }', 
+                                '{ campos['licenca'] }' ) """
                 
                 cur.execute(query_insert) #executa (raiozinho)
                 conn.commit() #salvar
@@ -95,22 +224,27 @@ class Janela(QtWidgets.QMainWindow, base.Ui_MainWindow):
         else:
             QMessageBox.about(self, "FALHA", "Usuário não cadastrado!\n Nenhum campo pode estar vazio")
 
-    def alterar(self): #botão alterar
-        campos = {'patrimonio': self.txt_patrimonio.text(),'modelo':self.txt_modelo.text(),'processador':self.txt_processador.text(),'memoria':self.txt_memoria.text(),
-                'status':self.txt_status.text(),'usuario':self.txt_usuario.text(),'setor':self.txt_setor.text(),'n_modelo':self.txt_n_modelo.text(),'n_serie':self.txt_n_serie.text(), 
-                'tipo_contrato':self.txt_tipo_contrato.text()}
+    #PAGE GERAL
+    def alterar(self):
+        campos = { 'patrimonio':self.txt_patrimonio.text(), 'tipo_item':self.txt_tipo_item.text(), 'posto_trabalho':self.txt_posto_trabalho.text(), 'descricao':self.txt_descricao.text(), 
+                  'uf':self.ddl_uf.currentText(), 'id_usuario':self.txt_id_usuario.text(), 'setor':self.ddl_setor.currentText(), 'modelo':self.txt_modelo.text(), 'marca':self.txt_marca.text(), 
+                  'n_modelo':self.txt_n_modelo.text(), 'processador':self.txt_processador.text(), 'n_serie':self.txt_n_serie.text(), 'email':self.txt_email.text(), 
+                  'memoria':self.txt_memoria.text(), 'status':self.ddl_status.currentText(), 'condicoes':self.txt_condicoes.text(), 'alugado':self.ddl_alugado.currentText(), 
+                  'ssd_hdd':self.ddl_ssd_hdd.currentText(), 'windows':self.txt_windows.text(), 'anydesk':self.txt_anydesk.text(), 'officie':self.ddl_officie.currentText(),
+                  'tipo_officie':self.ddl_tipo_officie.currentText(), 'conta':self.txt_conta.text(), 'chave':self.txt_chave.text(), 'licenca':self.txt_licenca.text() }
         
         conn = pymysql.connect(host='satelpjceara.com',port=3306, user='satelp03_marcosh' ,password='12345678', db='satelp03_bd_github')
         cur = conn.cursor()
         
-        if f.se_vazio(campos) == False:
+        if f.se_vazio( campos ) == False:
             try:
-                query_update = f"""UPDATE tb_base_patrimonio SET usuario ='{campos['usuario']}', setor = '{campos['setor']}', modelo = '{campos['modelo']}', 
-                                    processador = '{campos['processador']}', memoria = '{campos['memoria']}', status = '{campos['status']}', n_modelo = '{campos['n_modelo']}', 
-                                    n_serie = '{campos['n_serie']}', tipo_contrato = '{campos['tipo_contrato']}'
-                                    WHERE patrimonio = {campos['patrimonio']}"""
-
-                print(query_update)
+                query_update = f"""UPDATE satelp03_bd_github.tb_base_patrimonio SET tipo_item = '{ campos['tipo_item'] }', posto_trabalho = '{ campos['posto_trabalho'] }', 
+                                descricao = '{ campos['descricao'] }', uf = '{ campos['uf'] }', id_usuario = '{ campos['id_usuario'] }', setor = '{campos['setor']}', 
+                                modelo = '{ campos['modelo'] }', marca = '{ campos['marca'] }', n_modelo = '{ campos['n_modelo'] }', processador = '{ campos['processador'] }', 
+                                n_serie = '{ campos['n_serie'] }', email = '{ campos['email'] }', memoria = '{ campos['memoria'] }', status = '{ campos['status'] }', 
+                                condicoes = '{ campos['condicoes'] }', alugado = '{ campos['alugado'] }', ssd_hdd = '{ campos['ssd_hdd'] }', windows = '{ campos['windows'] }',
+                                anydesk = '{ campos['anydesk'] }', officie = '{ campos['officie'] }', tipo_officie = '{ campos['tipo_officie'] }', conta = '{ campos['conta'] }',
+                                chave = '{ campos['chave'] }', licenca = '{ campos['licenca'] }' WHERE patrimonio = { campos['patrimonio'] } """
                 
                 cur.execute(query_update) #executa (raiozinho)
                 conn.commit() #salvar
@@ -122,19 +256,22 @@ class Janela(QtWidgets.QMainWindow, base.Ui_MainWindow):
                 print(erro) 
                 
         else:
-            QMessageBox.about(self, "FALHA", "Não foi possível fazer alterações!\n Nenhum campo pode estar vazio")
-            
+            QMessageBox.about(self, "FALHA", "Não foi possível fazer as alterações!\n Nenhum campo pode estar vazio")
+         
     def apagar(self):
-        campos = {'patrimonio': self.txt_patrimonio.text(),'modelo':self.txt_modelo.text(),'processador':self.txt_processador.text(),'memoria':self.txt_memoria.text(),
-        'status':self.txt_status.text(),'usuario':self.txt_usuario.text(),'setor':self.txt_setor.text(),'n_modelo':self.txt_n_modelo.text(),'n_serie':self.txt_n_serie.text(), 
-        'tipo_contrato':self.txt_tipo_contrato.text()}
+        campos = { 'patrimonio':self.txt_patrimonio.text(),'tipo_item':self.txt_tipo_item.text(), 'posto_trabalho':self.txt_posto_trabalho.text(), 'descricao':self.txt_descricao.text(),
+                  'uf':self.ddl_uf.currentText(), 'id_usuario':self.txt_id_usuario.text(), 'setor':self.ddl_setor.currentText(), 'modelo':self.txt_modelo.text(), 'marca':self.txt_marca.text(), 
+                  'n_modelo':self.txt_n_modelo.text(), 'processador':self.txt_processador.text(), 'n_serie':self.txt_n_serie.text(), 'email':self.txt_email.text(), 'memoria':self.txt_memoria.text(), 
+                  'status':self.ddl_status.currentText(), 'condicoes':self.txt_condicoes.text(), 'alugado':self.ddl_alugado.currentText(), 'ssd_hdd':self.ddl_ssd_hdd.currentText(),
+                  'windows':self.txt_windows.text(), 'anydesk':self.txt_anydesk.text(), 'officie':self.ddl_officie.currentText(),'tipo_officie':self.ddl_tipo_officie.currentText(), 
+                  'conta':self.txt_conta.text(), 'chave':self.txt_chave.text(), 'licenca':self.txt_licenca.text() }
         
         conn = pymysql.connect(host='satelpjceara.com',port=3306, user='satelp03_marcosh' ,password='12345678', db='satelp03_bd_github')
         cur = conn.cursor()
       
-        query_delete = f"""DELETE FROM satelp03_bd_github.tb_base_patrimonio WHERE patrimonio = {campos['patrimonio']};"""                    
-
-        if f.se_vazio(campos) == False:
+        query_delete = f"""DELETE FROM satelp03_bd_github.tb_base_patrimonio WHERE patrimonio = { campos['patrimonio'] } """                    
+ 
+        if f.se_vazio( campos ) == False:
             try:
                 print(query_delete)
                 cur.execute(query_delete) #executa (raiozinho)
@@ -148,51 +285,181 @@ class Janela(QtWidgets.QMainWindow, base.Ui_MainWindow):
                 
         else:
             QMessageBox.about(self, "AVISO", "FALHA!\n Impossivel apagar os dados")
-
-        
+    
     def limpar(self): #botão limpar (ABA GERAL)
-        campos = [self.txt_patrimonio,self.txt_modelo,self.txt_processador,self.txt_memoria,self.txt_status,self.txt_usuario,self.txt_setor,
-        self.txt_n_modelo,self.txt_n_serie, self.txt_tipo_contrato]
+        campos = [ self.txt_patrimonio, self.txt_tipo_item, self.txt_posto_trabalho ,self.txt_descricao, self.txt_id_usuario ,self.txt_modelo, self.txt_marca, self.txt_n_modelo, 
+                  self.txt_processador, self.txt_n_serie, self.txt_email, self.txt_memoria, self.txt_condicoes, self.txt_windows, self.txt_anydesk, self.txt_conta, self.txt_chave, 
+                  self.txt_licenca, self.txt_windows, self.txt_anydesk, self.txt_conta, self.txt_chave, self.txt_licenca ]
         
         for item in campos:
             item.clear()
 
+#####################################################################################################################################################################################################
 
-    #ABA PESQUISA
+    #PAGE PESQUISA
     def buscarN(self): # botão buscar (ABA PESQUISA)
         filtro = self.txt_nome_buscar.text()  
         
         conn = pymysql.connect(host='satelpjceara.com',port=3306, user='satelp03_marcosh'  ,password='12345678', db='satelp03_bd_github')
-        query = f'select patrimonio,modelo,processador,memoria,status, usuario, setor from tb_base_patrimonio where usuario like "%{filtro}%"'
+        query = f"""select patrimonio, tipo_item, posto_trabalho, descricao, uf, id_usuario, modelo, marca, n_modelo, processador, n_serie, email, memoria, status, condicoes, alugado, 
+                sdd_hdd from tb_base_patrimonio where usuario like '%{filtro}%' """
+                
         tabela = pd.read_sql(query, conn)
        
         print(tabela)
     
-        if (filtro == '' or filtro == None):
+        if ( filtro == '' or filtro == None ):
             
             QMessageBox.about(self, "AVISO" , "Campo vazio! \n" "Por favor, preencha o campo de busca")  
             
         else:
-            tabela =tabela[tabela["usuario"].str.contains(filtro, na=False)]
+            tabela = tabela[ tabela[ "usuario" ].str.contains( filtro, na=False ) ]
             linha = 0
             
-            for linha_indice in (tabela.index):
+            for linha_indice in ( tabela.index ):
                 coluna = 0
                 
                 for item in tabela:  
-                    print(linha_indice, linha , coluna, item)
-                    self.x = tabela.iloc[linha,coluna] 
-                    self.tableWidget.setItem( linha, coluna, QTableWidgetItem(str(self.x)))
+                    print( linha_indice, linha , coluna, item )
+                    self.x = tabela.iloc[ linha,coluna ] 
+                    self.tableWidget.setItem( linha, coluna, QTableWidgetItem( str( self.x ) ) )
                     coluna = coluna +1
                     
                 linha = linha + 1
-                
     
-    def limparN(self): #botão limpar (ABA PESQUISA)
+    #PAGE PESQUISA            
+    def limparN(self):
         self.txt_nome_buscar.clear()
-        self.tableWidget.clear()
+        self.tableWidget.clear() 
+    
+#############################################################################################################################################################################################
+
+#PAGE EQUIPAMENTOS
+    def detalhes_equipamentos(self):
+        conn = pymysql.connect(host='satelpjceara.com',port=3306, user='satelp03_marcosh'  ,password='12345678', db='satelp03_bd_github')
+        cur = conn.cursor()
+    
+        try:
+            patrimonio_ver = self.txt_patrimonio_e.text()
+            
+            if patrimonio_ver == '' or patrimonio_ver == None:
+                QMessageBox.about(self, "AVISO" , "Campo vazio! \n" "Por favor, preencha o campo de busca")
+                
+            else:
+                filtro = int( self.txt_patrimonio_e.text() )
+                
+                query = f"select * from tb_base_equipamentos where patrimonio = { filtro }"
+                tabela = pd.read_sql(query, conn)
+            
+                if tabela.empty == False:
+                    
+                    uf = list( tabela[ 'uf' ] )[0]
+                    descricao = list( tabela[ 'descricao' ] )[0]
+                    posto_trabalho = list( tabela[ 'posto_trabalho' ] )[0]
+                    modelo = list( tabela[ 'modelo' ] )[0]
+                    marca = list( tabela[ 'marca' ] )[0]
+                    n_modelo = list( tabela[ 'n_modelo' ] )[0]
+                    n_serie = list( tabela[ 'n_serie' ] )[0]
+                    status = list( tabela[ 'status' ] )[0]
+                    
+                    self.txt_uf_e.setText( uf )
+                    self.txt_tipo.setText( descricao )
+                    self.txt_posto_trabalho_e.setText( posto_trabalho )
+                    self.txt_modelo_e.setText( modelo )
+                    self.txt_marca_e.setText( marca )
+                    self.txt_n_modelo_e.setText( n_modelo )
+                    self.txt_n_serie_e.setText( n_serie )
+                    self.txt_status_e.setText( status ) 
+                
+                else:
+                    QMessageBox.about(self, "FALHA", "Patrimonio não encontrado!")
+            
+        except Exception as error:
+            print(error)
+            
+    def cadastrar_equipamentos (self):
+        campos = { 'patrimonio':self.txt_patrimonio_e.text(),'uf':self.txt_uf_e.text(), 'descricao':self.txt_tipo.text(), 'posto_trabalho':self.txt_posto_trabalho_e.text(), 
+                  'modelo':self.txt_modelo_e.text(), 'marca':self.txt_marca_e.text(), 'n_modelo':self.txt_n_modelo_e.text(), 'n_serie':self.txt_n_serie_e.text(), 
+                  'status':self.txt_status_e.text() }
         
+        conn = pymysql.connect(host='satelpjceara.com',port=3306, user='satelp03_marcosh' ,password='12345678', db='satelp03_bd_github')
+        cur = conn.cursor()
         
+        if f.se_vazio( campos ) == False:
+            try:
+                query_insert = f""" INSERT INTO satelp03_bd_github.tb_base_equipamentos (patrimonio, uf, descricao, posto_trabalho, modelo, marca, n_modelo, n_serie, status) VALUES 
+                              ( { campos[ 'patrimonio' ] }, '{ campos[ 'uf' ] }', '{ campos[ 'descricao' ] }', '{ campos[ 'posto_trabalho' ] }', '{ campos[ 'modelo' ] }', 
+                              '{ campos[ 'marca' ] }', '{ campos[ 'n_modelo' ] }', '{ campos[ 'n_serie'] }', '{ campos[ 'status' ] }' )"""      
+                
+                cur.execute(query_insert)
+                conn.commit()
+                conn.close()
+                
+                QMessageBox.about(self, "AVISO", "Equipamento cadastrado com sucesso!")
+                
+            except Exception as erro:
+                print(erro)
+                
+        else:
+            QMessageBox.about(self, "FALHA", "Equipamento não cadastrado!\n Nenhum campo pode estar vazio") 
+            
+    def alterar_equipamentos (self):
+        campos = { 'patrimonio':self.txt_patrimonio_e.text(), 'uf':self.txt_uf_e.text(), 'descricao':self.txt_tipo.text(), 'posto_trabalho':self.txt_posto_trabalho_e.text(), 
+                  'modelo':self.txt_modelo_e.text(), 'marca':self.txt_marca_e.text(), 'n_modelo':self.txt_n_modelo_e.text(), 'n_serie':self.txt_n_serie_e.text(),
+                  'status':self.txt_status_e.text() }
+        
+        conn = pymysql.connect(host='satelpjceara.com',port=3306, user='satelp03_marcosh' ,password='12345678', db='satelp03_bd_github')
+        cur = conn.cursor()
+        
+        if f.se_vazio( campos ) == False:
+            try:
+                query_update = f""" UPDATE satelp03_bd_github.tb_base_equipamentos SET uf = '{ campos[ 'uf' ] }', descricao = '{ campos[ 'descricao' ] }', 
+                posto_trabalho = '{ campos[ 'posto_trabalho' ] }', modelo = '{ campos[ 'modelo' ] }', marca = '{ campos[ 'marca' ] }', n_modelo = '{ campos[ 'n_modelo' ] }', 
+                n_serie = '{ campos[ 'n_serie'] }', status = '{ campos[ 'status' ] }' WHERE patrimonio = { campos['patrimonio'] }"""
+                
+                cur.execute( query_update )
+                conn.commit()
+                conn.close()
+                
+                QMessageBox.about(self, "AVISO", "Equipamento alterado com sucesso!")
+                
+            except Exception as erro:
+                print(erro)
+        
+        else:
+            QMessageBox.about(self, "FALHA", "Não foi possivel fazer as alterações!\n Nenhum campo pode estar vazio") 
+            
+    def apagar_equipamentos (self):
+        campos = { 'patrimonio':self.txt_patrimonio_e.text(),'uf':self.txt_uf_e.text(), 'descricao':self.txt_tipo.text(), 'posto_trabalho':self.txt_posto_trabalho_e.text(), 
+            'modelo':self.txt_modelo_e.text(), 'marca':self.txt_marca_e.text(), 'n_modelo':self.txt_n_modelo_e.text(), 'n_serie':self.txt_n_serie_e.text(), 
+            'status':self.txt_status_e.text() }
+        
+        conn = pymysql.connect(host='satelpjceara.com',port=3306, user='satelp03_marcosh' ,password='12345678', db='satelp03_bd_github')
+        cur = conn.cursor()
+        
+        query_delete = f"""DELETE FROM satelp03_bd_github.tb_base_equipamentos WHERE patrimonio = { campos['patrimonio'] }"""
+        
+        if f.se_vazio( campos ) == False:
+            try:
+                cur.execute( query_delete )
+                conn.commit()
+                conn.close()
+
+                QMessageBox.about(self, "AVISO", "Dados apagados com sucesso!")
+                
+            except Exception as erro:
+                print(erro)
+        
+        else:
+            QMessageBox.about(self, "AVISO", "Impossivel deletar os dados!")
+        
+    def limpar2 (self):
+        campos = [ self.txt_patrimonio_e, self.txt_uf_e, self.txt_tipo, self.txt_posto_trabalho_e, self.txt_modelo_e, self.txt_marca_e, self.txt_n_modelo_e, self.txt_n_serie_e, 
+                  self.txt_status_e ]
+        
+        for item in campos:
+            item.clear()
+               
 def main():
     app = QApplication(sys.argv)
     form = Janela()
