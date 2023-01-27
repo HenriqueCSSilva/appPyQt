@@ -29,6 +29,8 @@ class Janela(QtWidgets.QMainWindow, base.Ui_MainWindow):
         self.btn_cadastrar_2.clicked.connect(self.cadastrar_equipamentos)
         self.btn_alterar_2.clicked.connect(self.alterar_equipamentos)
         self.btn_apagar_2.clicked.connect(self.apagar_equipamentos)
+        
+        self.btn_gerar_doc.clicked.connect(self.gerar_excel)
     
         
     #PAGE GERAL    
@@ -330,6 +332,62 @@ class Janela(QtWidgets.QMainWindow, base.Ui_MainWindow):
             msg.setText("Impossivel apagar os dados")
             msg.setIcon(QMessageBox.Critical)
             msg.exec_()
+            
+    def gerar_excel(self):
+        campos = { 'patrimonio':self.txt_patrimonio.text(), 'descricao':self.txt_descricao.text(), 'processador':self.txt_processador.text(), 'memoria': self.txt_memoria.text() }
+        
+        try:
+            if f.se_vazio( campos ) == False:          
+                conn = pymysql.connect(host='satelpjceara.com',port=3306, user='satelp03_marcosh' ,password='12345678', db='satelp03_bd_github')
+                cur = conn.cursor()
+                
+                filtro = int( self.txt_patrimonio.text() )
+                
+                query = f"""SELECT  t2.name, t1.setor, t1.patrimonio, t1.descricao, t1.modelo, t1.processador, t1.memoria, t1.ssd_hdd FROM satelp03_bd_github.tb_base_patrimonio AS t1
+                LEFT JOIN satelp03_bd_github.users as t2 ON t1.id_usuario  = t2.id WHERE patrimonio = { filtro }"""
+                
+                tabela = pd.read_sql(query, conn)
+                print(tabela)
+                
+                name = list( tabela[ 'name' ] )[0]
+                setor = list( tabela[ 'setor' ] )[0]
+                
+                patrimonio = list( tabela[ 'patrimonio' ] )[0]
+                modelo = list( tabela[ 'modelo' ] )[0]
+                descricao = list( tabela[ 'descricao' ] )[0]
+                processador = list( tabela[ 'processador' ] )[0]
+                memoria = list( tabela[ 'memoria' ] )[0]
+                ssd_hdd = list( tabela[ 'ssd_hdd' ] )[0]
+                quantidade = '1'
+                
+                planilha = load_workbook("base_de_dados/Termo_de_Responsabilidade_SAT-RG-039_-_Rio_de_Janeiro_-_hardware.xlsx")
+                aba_ativa = planilha.active
+                
+                aba_ativa['A6'] = 'Nome: ' +  name
+                aba_ativa['A7'] = 'Setor: ' + setor
+                
+                aba_ativa['A11'] = patrimonio
+                aba_ativa['B11'] = modelo + ' / ' + descricao + ' / ' + processador + ' / ' + memoria + ' / ' + ssd_hdd
+                aba_ativa['D11'] = quantidade
+                
+                planilha.save(f"termos/{ patrimonio }_Termo_de_Responsabilidade.xlsx")
+                
+                msg = QMessageBox()
+                msg.setWindowTitle('AVISO')
+                msg.setText('O documento foi gerado com sucesso!')
+                msg.setIcon(QMessageBox.Information)
+                msg.exec_()
+            
+            else:
+                msg = QMessageBox()
+                msg.setWindowTitle("FALHA")
+                msg.setText('Impossivel gerar documento!')
+                msg.setInformativeText('O campo do patrimonio não pode estar vazio')
+                msg.setIcon(QMessageBox.Critical)
+                msg.exec_()
+                
+        except Exception as erro:
+            print(erro)
     
     def limpar(self): #botão limpar (ABA GERAL)
         campos = [ self.txt_patrimonio, self.txt_tipo_item, self.txt_posto_trabalho ,self.txt_descricao, self.txt_id_usuario ,self.txt_modelo, self.txt_marca, self.txt_n_modelo, 
@@ -355,20 +413,22 @@ class Janela(QtWidgets.QMainWindow, base.Ui_MainWindow):
             
         else:
             conn = pymysql.connect(host='satelpjceara.com',port=3306, user='satelp03_marcosh'  ,password='12345678', db='satelp03_bd_github')
-            query = f"""select patrimonio, tipo_item, posto_trabalho, descricao, uf, id_usuario, modelo, marca, n_modelo, processador, n_serie, email, memoria, status, condicoes, alugado, 
-                    sdd_hdd from tb_base_patrimonio where usuario like ' %{ filtro }% ' """
-                    
+            
+            query = f"""select t2.name, t1.patrimonio, t1.tipo_item, t1.posto_trabalho, t1.descricao, t1.uf, t1.modelo, t1.marca, t1.n_modelo, t1.processador, t1.n_serie, 
+            t1.email, t1.memoria, t1.status, t1.condicoes, t1.ssd_hdd
+            from satelp03_bd_github.tb_base_patrimonio as t1 left join satelp03_bd_github.users as t2 on t1.id_usuario = t2.id where name like '%{ filtro }%' """
+                  
             tabela = pd.read_sql(query, conn)
             print(tabela)
         
-            tabela = tabela[ tabela[ "usuario" ].str.contains( filtro, na=False ) ]
+            tabela = tabela[ tabela[ "name" ].str.contains( filtro, na=False ) ]
             linha = 0
             
             for linha_indice in ( tabela.index ):
                 coluna = 0
                 
                 for item in tabela:  
-                    print( linha_indice, linha , coluna, item )
+                    # print( linha_indice, linha , coluna, item )
                     self.x = tabela.iloc[ linha,coluna ] 
                     self.tableWidget.setItem( linha, coluna, QTableWidgetItem( str( self.x ) ) )
                     coluna = coluna +1
