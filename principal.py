@@ -14,27 +14,26 @@ class Janela(QtWidgets.QMainWindow, base.Ui_MainWindow):
         self.setupUi(self)
         
         #BOTÕES
-        self.btn_buscar_detalhes.clicked.connect(self.detalhes_usuario)
-        self.btn_limpar_detalhes.clicked.connect(self.limpar)
-        self.btn_apagar.clicked.connect(self.apagar)
+        self.btn_buscar_detalhes.clicked.connect(self.detalhes_pc)
+        self.btn_cadastrar.clicked.connect(self.cadastrar_pc)
+        self.btn_alterar.clicked.connect(self.alterar_pc)
+        self.btn_apagar.clicked.connect(self.deletar_pc)
+        self.btn_limpar_detalhes.clicked.connect(self.limpar_pc)
+        self.btn_gerar_doc.clicked.connect(self.gerar_excel)
         
-        self.btn_alterar.clicked.connect(self.alterar)
-        self.btn_cadastrar.clicked.connect(self.cadastrar)
-        
-        self.btn_buscar_nome.clicked.connect(self.buscarN)
-        self.btn_limpar_nome.clicked.connect(self.limparN)
+        self.btn_buscar_nome.clicked.connect(self.buscar_nome)
+        self.btn_limpar_nome.clicked.connect(self.limpar_nome)
         
         self.btn_buscar_detalhes_2.clicked.connect(self.detalhes_equipamentos)
-        self.btn_limpar_detalhes_2.clicked.connect(self.limpar2)
         self.btn_cadastrar_2.clicked.connect(self.cadastrar_equipamentos)
         self.btn_alterar_2.clicked.connect(self.alterar_equipamentos)
-        self.btn_apagar_2.clicked.connect(self.apagar_equipamentos)
+        self.btn_apagar_2.clicked.connect(self.deletar_equipamentos)
+        self.btn_limpar_detalhes_2.clicked.connect(self.limpar_equipamentos)
         
-        self.btn_gerar_doc.clicked.connect(self.gerar_excel)
     
         
     #PAGE GERAL    
-    def detalhes_usuario(self): 
+    def detalhes_pc(self): 
         conn = pymysql.connect(host='satelpjceara.com',port=3306, user='satelp03_marcosh'  ,password='12345678', db='satelp03_bd_github')
         cur = conn.cursor()
     
@@ -193,7 +192,7 @@ class Janela(QtWidgets.QMainWindow, base.Ui_MainWindow):
             print(error)
     
     #PAGE GERAL    
-    def cadastrar(self):        
+    def cadastrar_pc(self):        
         campos = { 'patrimonio': self.txt_patrimonio.text(), 'tipo_item':self.txt_tipo_item.text(), 'posto_trabalho':self.txt_posto_trabalho.text(), 'descricao':self.txt_descricao.text(), 
                  'uf':self.ddl_uf.currentText(),'id_usuario':self.txt_id_usuario.text(), 'setor':self.ddl_setor.currentText(), 'modelo':self.txt_modelo.text(), 'marca':self.txt_marca.text(), 
                  'n_modelo':self.txt_n_modelo.text(), 'processador':self.txt_processador.text(), 'n_serie':self.txt_n_serie.text(), 'email':self.txt_email.text(), 
@@ -236,7 +235,7 @@ class Janela(QtWidgets.QMainWindow, base.Ui_MainWindow):
             msg.exec_()
 
     #PAGE GERAL
-    def alterar(self):
+    def alterar_pc(self):
         campos = { 'patrimonio':self.txt_patrimonio.text(), 'tipo_item':self.txt_tipo_item.text(), 'posto_trabalho':self.txt_posto_trabalho.text(), 'descricao':self.txt_descricao.text(), 
                   'uf':self.ddl_uf.currentText(), 'id_usuario':self.txt_id_usuario.text(), 'setor':self.ddl_setor.currentText(), 'modelo':self.txt_modelo.text(), 'marca':self.txt_marca.text(), 
                   'n_modelo':self.txt_n_modelo.text(), 'processador':self.txt_processador.text(), 'n_serie':self.txt_n_serie.text(), 'email':self.txt_email.text(), 
@@ -253,7 +252,6 @@ class Janela(QtWidgets.QMainWindow, base.Ui_MainWindow):
         msg.setIcon(QMessageBox.Warning)
         msg.setStandardButtons(QMessageBox.Yes | QMessageBox.Cancel)
         msg.setDefaultButton(QMessageBox.Cancel)
-
         executar = msg.exec_()
         
         if f.se_vazio( campos ) == False:
@@ -288,7 +286,7 @@ class Janela(QtWidgets.QMainWindow, base.Ui_MainWindow):
             msg.setIcon(QMessageBox.Critical)
             msg.exec_()
          
-    def apagar(self):
+    def deletar_pc(self):
         campos = { 'patrimonio':self.txt_patrimonio.text(),'tipo_item':self.txt_tipo_item.text(), 'posto_trabalho':self.txt_posto_trabalho.text(), 'descricao':self.txt_descricao.text(),
                   'uf':self.ddl_uf.currentText(), 'id_usuario':self.txt_id_usuario.text(), 'setor':self.ddl_setor.currentText(), 'modelo':self.txt_modelo.text(), 'marca':self.txt_marca.text(), 
                   'n_modelo':self.txt_n_modelo.text(), 'processador':self.txt_processador.text(), 'n_serie':self.txt_n_serie.text(), 'email':self.txt_email.text(), 'memoria':self.txt_memoria.text(), 
@@ -343,7 +341,7 @@ class Janela(QtWidgets.QMainWindow, base.Ui_MainWindow):
                 
                 filtro = int( self.txt_patrimonio.text() )
                 
-                query = f"""SELECT  t2.name, t1.setor, t1.patrimonio, t1.descricao, t1.modelo, t1.processador, t1.memoria, t1.ssd_hdd FROM satelp03_bd_github.tb_base_patrimonio AS t1
+                query = f"""SELECT  t2.name, t1.setor, t1.patrimonio, t1.modelo, t1.descricao, t1.processador, t1.memoria, t1.ssd_hdd FROM satelp03_bd_github.tb_base_patrimonio AS t1
                 LEFT JOIN satelp03_bd_github.users as t2 ON t1.id_usuario  = t2.id WHERE patrimonio = { filtro }"""
                 
                 tabela = pd.read_sql(query, conn)
@@ -389,7 +387,7 @@ class Janela(QtWidgets.QMainWindow, base.Ui_MainWindow):
         except Exception as erro:
             print(erro)
     
-    def limpar(self): #botão limpar (ABA GERAL)
+    def limpar_pc(self): #botão limpar (ABA GERAL)
         campos = [ self.txt_patrimonio, self.txt_tipo_item, self.txt_posto_trabalho ,self.txt_descricao, self.txt_id_usuario ,self.txt_modelo, self.txt_marca, self.txt_n_modelo, 
                   self.txt_processador, self.txt_n_serie, self.txt_email, self.txt_memoria, self.txt_condicoes, self.txt_windows, self.txt_anydesk, self.txt_conta, self.txt_chave, 
                   self.txt_licenca, self.txt_windows, self.txt_anydesk, self.txt_conta, self.txt_chave, self.txt_licenca ]
@@ -400,7 +398,7 @@ class Janela(QtWidgets.QMainWindow, base.Ui_MainWindow):
 #####################################################################################################################################################################################################
 
     #PAGE PESQUISA
-    def buscarN(self): # botão buscar (ABA PESQUISA)
+    def buscar_nome(self): # botão buscar (ABA PESQUISA)
         filtro = self.txt_nome_buscar.text()
           
         if ( filtro == '' or filtro == None ):
@@ -436,7 +434,7 @@ class Janela(QtWidgets.QMainWindow, base.Ui_MainWindow):
                 linha = linha + 1
     
     #PAGE PESQUISA            
-    def limparN(self):
+    def limpar_nome(self):
         self.txt_nome_buscar.clear()
         self.tableWidget.clear() 
     
@@ -595,7 +593,7 @@ class Janela(QtWidgets.QMainWindow, base.Ui_MainWindow):
             msg.setIcon(QMessageBox.Critical)
             msg.exec_()
             
-    def apagar_equipamentos (self):
+    def deletar_equipamentos (self):
         campos = { 'patrimonio':self.txt_patrimonio_e.text(),'uf':self.ddl_uf_e.currentText(), 'descricao':self.txt_tipo.text(), 'posto_trabalho':self.txt_posto_trabalho_e.text(), 
             'modelo':self.txt_modelo_e.text(), 'marca':self.txt_marca_e.text(), 'n_modelo':self.txt_n_modelo_e.text(), 'n_serie':self.txt_n_serie_e.text(), 
             'status':self.ddl_status_e.currentText() }
@@ -637,7 +635,7 @@ class Janela(QtWidgets.QMainWindow, base.Ui_MainWindow):
             msg.setIcon(QMessageBox.Critical)
             msg.exec_()
         
-    def limpar2 (self):
+    def limpar_equipamentos (self):
         campos = [ self.txt_patrimonio_e, self.txt_tipo, self.txt_posto_trabalho_e, self.txt_modelo_e, self.txt_marca_e, self.txt_n_modelo_e, self.txt_n_serie_e ]
         
         for item in campos:
