@@ -1,4 +1,0 @@
-setStandardButtons(msg.Ok | msg.Cancel)
-
-msg.about(self, "AVISO", "Dados apagados com sucesso!") 
-t1.windows, t1.anydesk, t1.officie, t1.conta, t1.chave, t1.licenca,
