@@ -1,26 +1,3 @@
-    # def detalhes_programas(self):
-    #     conn = pymysql.connect(host='satelpjceara.com',port=3306, user='satelp03_marcosh'  ,password='12345678', db='satelp03_bd_github')
-    #     cur = conn.cursor() 
-      
-    #     query_programaas = f"select * from satelp03_bd_github.tb_programas"
-    #     tabela = pd.read_sql( query_programaas, conn )
-        
-    #     windows = list( tabela[ 'windows' ] )[0]
-    #     anydesk = list( tabela[ 'anydesk' ] )[0]
-    #     officie = list( tabela[ 'offcie' ] )[0]
-    #     tipo_officie = list( tabela[ 'tipo_offcie' ] )[0]
-    #     conta = list( tabela[ 'conta' ] )[0]        
-    #     chave = list( tabela[ 'chave' ] )[0]
-    #     licenca = list( tabela[ 'licenca' ] )[0]    
-        
-    #     self.txt_windows.setText(windows)
-    #     self.txt_anydesk.setText(anydesk)
-    #     self.txt_officie.setText(officie)
-    #     self.txt_tipo_officie.setText(tipo_officie)
-    #     self.txt_conta.setText(conta)
-    #     self.txt_chave.setText(chave)
-    #     self.txt_licenca.setText(licenca)
+setStandardButtons(msg.Ok | msg.Cancel)
 
-        # def detalhes (self):
-    #     self.detalhes_usuario()
-    #     self.detalhes_programas()
+msg.about(self, "AVISO", "Dados apagados com sucesso!") 
