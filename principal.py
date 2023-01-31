@@ -1,17 +1,75 @@
 from PyQt5 import QtCore, QtGui, QtWidgets
-from PyQt5.QtWidgets import QApplication, QMessageBox, QTableWidgetItem,QComboBox
+from PyQt5.QtWidgets import QApplication, QMessageBox, QTableWidgetItem, QComboBox, QToolButton, QMainWindow
 import sys
-import os
 import base
+import base2
 import pandas as pd
 import pymysql
 import funcoes as f
-from openpyxl import Workbook, load_workbook
+from reportlab.pdfgen import canvas
+from reportlab.platypus import Paragraph
 
-class Janela(QtWidgets.QMainWindow, base.Ui_MainWindow):
+class Janela2(QtWidgets.QMainWindow, base2.Ui_SegundaJanela):
+    def __init__(self, parent=None):
+        super(Janela2, self).__init__(parent)
+        self.setupUi(self)
+        
+        self.btn_buscar_nome.clicked.connect(self.buscar_nome)
+        self.btn_limpar_nome.clicked.connect(self.limpar_nome)
+
+    def buscar_nome(self): # botão buscar (ABA PESQUISA)
+        filtro = self.txt_nome_buscar.text()
+        
+        try:
+            if ( filtro == '' or filtro == None ):
+                msg = QMessageBox()
+                msg.setWindowTitle("AVISO")
+                msg.setText("Campo vazio!")
+                msg.setInformativeText("Por favor, preencha o campo de busca")
+                msg.setIcon(QMessageBox.Information)
+                msg.exec_()  
+                
+            else:
+                conn = pymysql.connect(host='satelpjceara.com',port=3306, user='satelp03_marcosh'  ,password='12345678', db='satelp03_bd_github')
+                
+                query = f"""select t2.name, t1.patrimonio, t1.tipo_item, t1.posto_trabalho, t1.descricao, t1.uf, t1.modelo, t1.marca, t1.n_modelo, t1.processador, t1.n_serie, 
+                t1.email, t1.memoria, t1.status, t1.condicoes, t1.ssd_hdd
+                from satelp03_bd_github.tb_base_patrimonio as t1 left join satelp03_bd_github.users as t2 on t1.id_usuario = t2.id where name like '%{ filtro }%' """
+                  
+                tabela = pd.read_sql(query, conn)
+                
+                if ( tabela.empty == True):
+                    
+                    msg = QMessageBox()
+                    msg.setWindowTitle('AVISO')
+                    msg.setText("Usuário não encontrado!")
+                    msg.setIcon(QMessageBox.Information)
+                    msg.exec_()
+                    
+                else:
+                    
+                    linha = 0
+                    for linha_indice in ( tabela.index ):
+                        coluna = 0
+                        
+                        for item in tabela:  
+                            self.x = tabela.iloc[ linha,coluna ] 
+                            self.tableWidget.setItem( linha, coluna, QTableWidgetItem( str( self.x ) ) )
+                            coluna = coluna +1
+                            
+                        linha = linha + 1
+                 
+        except Exception as erro:
+            print(erro)
+            
+    def limpar_nome(self):
+        self.txt_nome_buscar.clear()
+class Janela(QtWidgets.QMainWindow, base.Ui_PrimeiraJanela):
     def __init__(self, parent=None):
         super(Janela, self).__init__(parent)
         self.setupUi(self)
+        
+        self.janela2 = Janela2()
         
         #BOTÕES
         self.btn_buscar_detalhes.clicked.connect(self.detalhes_pc)
@@ -19,10 +77,8 @@ class Janela(QtWidgets.QMainWindow, base.Ui_MainWindow):
         self.btn_alterar.clicked.connect(self.alterar_pc)
         self.btn_apagar.clicked.connect(self.deletar_pc)
         self.btn_limpar_detalhes.clicked.connect(self.limpar_pc)
-        self.btn_gerar_doc.clicked.connect(self.gerar_excel)
         
-        self.btn_buscar_nome.clicked.connect(self.buscar_nome)
-        self.btn_limpar_nome.clicked.connect(self.limpar_nome)
+        self.btn_gerar_doc.clicked.connect(self.gerar_pdf)
         
         self.btn_buscar_detalhes_2.clicked.connect(self.detalhes_equipamentos)
         self.btn_cadastrar_2.clicked.connect(self.cadastrar_equipamentos)
@@ -30,9 +86,9 @@ class Janela(QtWidgets.QMainWindow, base.Ui_MainWindow):
         self.btn_apagar_2.clicked.connect(self.deletar_equipamentos)
         self.btn_limpar_detalhes_2.clicked.connect(self.limpar_equipamentos)
         
-    
-        
-    #PAGE GERAL    
+        self.btn_buscar_por_nome.clicked.connect(self.abrir_janela_buscar_nome)
+           
+#PAGE GERAL    
     def detalhes_pc(self): 
         conn = pymysql.connect(host='satelpjceara.com',port=3306, user='satelp03_marcosh'  ,password='12345678', db='satelp03_bd_github')
         cur = conn.cursor()
@@ -190,8 +246,7 @@ class Janela(QtWidgets.QMainWindow, base.Ui_MainWindow):
                 
         except Exception as error:
             print(error)
-    
-    #PAGE GERAL    
+       
     def cadastrar_pc(self):        
         campos = { 'patrimonio': self.txt_patrimonio.text(), 'tipo_item':self.txt_tipo_item.text(), 'posto_trabalho':self.txt_posto_trabalho.text(), 'descricao':self.txt_descricao.text(), 
                  'uf':self.ddl_uf.currentText(),'id_usuario':self.txt_id_usuario.text(), 'setor':self.ddl_setor.currentText(), 'modelo':self.txt_modelo.text(), 'marca':self.txt_marca.text(), 
@@ -203,38 +258,48 @@ class Janela(QtWidgets.QMainWindow, base.Ui_MainWindow):
         conn = pymysql.connect(host='satelpjceara.com',port=3306, user='satelp03_marcosh' ,password='12345678', db='satelp03_bd_github')
         cur = conn.cursor()
         
-        if f.se_vazio( campos ) == False: 
-            try:
-                query_insert = f"""INSERT INTO satelp03_bd_github.tb_base_patrimonio( patrimonio, tipo_item, posto_trabalho, descricao, uf, id_usuario, setor, modelo, marca, n_modelo, 
-                                processador, n_serie, email, memoria, status, condicoes, alugado, ssd_hdd, windows, anydesk, officie, tipo_officie, conta, chave, licenca ) 
-                                VALUES ( { campos['patrimonio'] }, '{ campos['tipo_item'] }', '{ campos['posto_trabalho']}', '{ campos['descricao'] }', '{ campos['uf'] }', '{ campos['id_usuario'] }', 
-                                '{ campos[ 'setor' ] }', '{ campos['modelo'] }', '{ campos['marca'] }', '{ campos['n_modelo'] }', '{ campos['processador'] }', '{ campos['n_serie'] }', 
-                                '{ campos['email'] }', '{ campos['memoria'] }', '{ campos['status'] }', '{ campos['condicoes'] }', '{ campos['alugado'] }', '{ campos['ssd_hdd'] }', 
-                                '{ campos['windows'] }', '{ campos['anydesk'] }','{ campos['officie'] }', '{ campos['tipo_officie'] }', '{ campos['conta'] }', '{ campos['chave'] }', 
-                                '{ campos['licenca'] }' ) """
-                
-                cur.execute(query_insert) #executa (raiozinho)
-                conn.commit() #salvar
-                conn.close()
-                
-                msg = QMessageBox()   
-                msg.setWindowTitle("AVISO")
-                msg.setText("Usuário cadastrado com sucesso!")
-                msg.setIcon(QMessageBox.Information)
+        if f.caracter_9( campos['anydesk'] ) == True: #refatorar
+            
+            if f.se_vazio( campos ) == False : 
+                try:
+                    query_insert = f"""INSERT INTO satelp03_bd_github.tb_base_patrimonio( patrimonio, tipo_item, posto_trabalho, descricao, uf, id_usuario, setor, modelo, marca, n_modelo, 
+                                    processador, n_serie, email, memoria, status, condicoes, alugado, ssd_hdd, windows, anydesk, officie, tipo_officie, conta, chave, licenca ) 
+                                    VALUES ( { campos['patrimonio'] }, '{ campos['tipo_item'] }', '{ campos['posto_trabalho']}', '{ campos['descricao'] }', '{ campos['uf'] }', '{ campos['id_usuario'] }', 
+                                    '{ campos[ 'setor' ] }', '{ campos['modelo'] }', '{ campos['marca'] }', '{ campos['n_modelo'] }', '{ campos['processador'] }', '{ campos['n_serie'] }', 
+                                    '{ campos['email'] }', '{ campos['memoria'] }', '{ campos['status'] }', '{ campos['condicoes'] }', '{ campos['alugado'] }', '{ campos['ssd_hdd'] }', 
+                                    '{ campos['windows'] }', '{ campos['anydesk'] }','{ campos['officie'] }', '{ campos['tipo_officie'] }', '{ campos['conta'] }', '{ campos['chave'] }', 
+                                    '{ campos['licenca'] }' ) """
+                                    
+                    
+                    cur.execute(query_insert) #executa (raiozinho)
+                    conn.commit() #salvar
+                    conn.close()
+                    
+                    msg = QMessageBox()   
+                    msg.setWindowTitle("AVISO")
+                    msg.setText("Usuário cadastrado com sucesso!")
+                    msg.setIcon(QMessageBox.Information)
+                    msg.exec_()
+                    
+                except Exception as erro:
+                    print(erro)
+                    
+            else:
+                msg = QMessageBox()
+                msg.setWindowTitle("FALHA")
+                msg.setText("Usuário não cadastrado!")
+                msg.setInformativeText("Nenhum campo pode estar vazio")
+                msg.setIcon(QMessageBox.Critical)
                 msg.exec_()
-                
-            except Exception as erro:
-                print(erro)
-                
+        
         else:
             msg = QMessageBox()
             msg.setWindowTitle("FALHA")
             msg.setText("Usuário não cadastrado!")
-            msg.setInformativeText("Nnehum campo pode estar vazio")
+            msg.setInformativeText("Verificar campo anydesk")
             msg.setIcon(QMessageBox.Critical)
             msg.exec_()
 
-    #PAGE GERAL
     def alterar_pc(self):
         campos = { 'patrimonio':self.txt_patrimonio.text(), 'tipo_item':self.txt_tipo_item.text(), 'posto_trabalho':self.txt_posto_trabalho.text(), 'descricao':self.txt_descricao.text(), 
                   'uf':self.ddl_uf.currentText(), 'id_usuario':self.txt_id_usuario.text(), 'setor':self.ddl_setor.currentText(), 'modelo':self.txt_modelo.text(), 'marca':self.txt_marca.text(), 
@@ -254,35 +319,45 @@ class Janela(QtWidgets.QMainWindow, base.Ui_MainWindow):
         msg.setDefaultButton(QMessageBox.Cancel)
         executar = msg.exec_()
         
-        if f.se_vazio( campos ) == False:
-            try:
-                if executar == msg.Yes:
-                    query_update = f"""UPDATE satelp03_bd_github.tb_base_patrimonio SET tipo_item = '{ campos['tipo_item'] }', posto_trabalho = '{ campos['posto_trabalho'] }', 
-                                    descricao = '{ campos['descricao'] }', uf = '{ campos['uf'] }', id_usuario = '{ campos['id_usuario'] }', setor = '{campos['setor']}', 
-                                    modelo = '{ campos['modelo'] }', marca = '{ campos['marca'] }', n_modelo = '{ campos['n_modelo'] }', processador = '{ campos['processador'] }', 
-                                    n_serie = '{ campos['n_serie'] }', email = '{ campos['email'] }', memoria = '{ campos['memoria'] }', status = '{ campos['status'] }', 
-                                    condicoes = '{ campos['condicoes'] }', alugado = '{ campos['alugado'] }', ssd_hdd = '{ campos['ssd_hdd'] }', windows = '{ campos['windows'] }',
-                                    anydesk = '{ campos['anydesk'] }', officie = '{ campos['officie'] }', tipo_officie = '{ campos['tipo_officie'] }', conta = '{ campos['conta'] }',
-                                    chave = '{ campos['chave'] }', licenca = '{ campos['licenca'] }' WHERE patrimonio = { campos['patrimonio'] } """
-                
-                    cur.execute(query_update) #executa (raiozinho)
-                    conn.commit() #salvar
-                    conn.close()
+        
+        if f.caracter_9( campos['anydesk'] ) == True: #refatorar
+            if f.se_vazio( campos ) == False:
+                try:
+                    if executar == msg.Yes:
+                        query_update = f"""UPDATE satelp03_bd_github.tb_base_patrimonio SET tipo_item = '{ campos['tipo_item'] }', posto_trabalho = '{ campos['posto_trabalho'] }', 
+                                        descricao = '{ campos['descricao'] }', uf = '{ campos['uf'] }', id_usuario = '{ campos['id_usuario'] }', setor = '{campos['setor']}', 
+                                        modelo = '{ campos['modelo'] }', marca = '{ campos['marca'] }', n_modelo = '{ campos['n_modelo'] }', processador = '{ campos['processador'] }', 
+                                        n_serie = '{ campos['n_serie'] }', email = '{ campos['email'] }', memoria = '{ campos['memoria'] }', status = '{ campos['status'] }', 
+                                        condicoes = '{ campos['condicoes'] }', alugado = '{ campos['alugado'] }', ssd_hdd = '{ campos['ssd_hdd'] }', windows = '{ campos['windows'] }',
+                                        anydesk = '{ campos['anydesk'] }', officie = '{ campos['officie'] }', tipo_officie = '{ campos['tipo_officie'] }', conta = '{ campos['conta'] }',
+                                        chave = '{ campos['chave'] }', licenca = '{ campos['licenca'] }' WHERE patrimonio = { campos['patrimonio'] } """
                     
-                    msg = QMessageBox()
-                    msg.setWindowTitle("AVISO")
-                    msg.setText("Alterações feitas com sucesso!")
-                    msg.setIcon(QMessageBox.Information)
-                    msg.exec_()
-                
-            except Exception as erro:
-                print(erro) 
-                
+                        cur.execute(query_update) #executa (raiozinho)
+                        conn.commit() #salvar
+                        conn.close()
+                        
+                        msg = QMessageBox()
+                        msg.setWindowTitle("AVISO")
+                        msg.setText("Alterações feitas com sucesso!")
+                        msg.setIcon(QMessageBox.Information)
+                        msg.exec_()
+                    
+                except Exception as erro:
+                    print(erro) 
+                    
+            else:
+                msg = QMessageBox()
+                msg.setWindowTitle("FALHA")
+                msg.setText("Não foi possivel fazer as alterações!")
+                msg.setInformativeText("Nenhum campo pode estar vazio")
+                msg.setIcon(QMessageBox.Critical)
+                msg.exec_()
+        
         else:
             msg = QMessageBox()
             msg.setWindowTitle("FALHA")
-            msg.setText("Não foi possivel fazer as alterações!")
-            msg.setInformativeText("Nenhum campo pode estar vazio")
+            msg.setText("Usuário não cadastrado!")
+            msg.setInformativeText("Verificar campo anydesk")
             msg.setIcon(QMessageBox.Critical)
             msg.exec_()
          
@@ -331,7 +406,7 @@ class Janela(QtWidgets.QMainWindow, base.Ui_MainWindow):
             msg.setIcon(QMessageBox.Critical)
             msg.exec_()
             
-    def gerar_excel(self):
+    def gerar_pdf(self):
         campos = { 'patrimonio':self.txt_patrimonio.text(), 'descricao':self.txt_descricao.text(), 'processador':self.txt_processador.text(), 'memoria': self.txt_memoria.text() }
         
         try:
@@ -358,17 +433,96 @@ class Janela(QtWidgets.QMainWindow, base.Ui_MainWindow):
                 ssd_hdd = list( tabela[ 'ssd_hdd' ] )[0]
                 quantidade = '1'
                 
-                planilha = load_workbook("base_de_dados/Termo_de_Responsabilidade_SAT-RG-039_-_Rio_de_Janeiro_-_hardware.xlsx")
-                aba_ativa = planilha.active
+                pdf = canvas.Canvas(f"termos/{patrimonio }_Termo_Responsabilidade.pdf")
                 
-                aba_ativa['A6'] = 'Nome: ' +  name
-                aba_ativa['A7'] = 'Setor: ' + setor
+                pdf.setTitle(f"patrimonio { str( patrimonio ) }")
+                pdf.drawInlineImage('satel.png', 230, 740, 120, 120, preserveAspectRatio= True)
+                pdf.setFont('Helvetica-Bold', 15)
+                pdf.drawCentredString(280, 750, "Termo de Responsabilidade de Uso")
+                pdf.setFont('Helvetica-Bold', 13)
+                pdf.drawCentredString(290, 730, "SAT-RG-39")
+
+                id = Paragraph('IDENTIFICAÇÃO DO COLABORADOR')
+                id.wrapOn(pdf, 400, 100)
+                id.drawOn(pdf, 100, 682)
+                n = Paragraph('NOME: ' + name)
+                n.wrapOn(pdf, 400, 100)
+                n.drawOn(pdf, 100, 660)
+                s = Paragraph('SETOR: ' + setor)
+                s.wrapOn(pdf, 400, 100)
+                s.drawOn(pdf, 100, 640)
+
+                pdf.drawInlineImage('tabela patrimonio.png', 90, 380, 400, 400, preserveAspectRatio= True)
+
+                p = Paragraph( str( patrimonio ) )
+                p.wrapOn(pdf, 400, 100)
+                p.drawOn(pdf, 117, 591)
+                d = Paragraph(modelo + ' / ' +  descricao + ' / ' +  processador + ' / ' + memoria + ' / ' +  ssd_hdd)
+                d.wrapOn(pdf, 400, 100)
+                d.drawOn(pdf, 165, 591)
+                q = Paragraph(quantidade)
+                q.wrapOn(pdf, 400, 100)
+                q.drawOn(pdf, 467, 591)
+
+                pdf.line(80, 515, 500, 515)
+
+                p0 = Paragraph(f"""Recebi da empresa SATEL – SERVIÇOS AUXILIARES DE TELECOMUNICAÇÕES DO BRASIL LTDA, CNPJ Nº 16.857.533/0001-24, a título de empréstimo, para uso exclusivo, 
+                            conforme determinado em lei, os equipamentos especificados neste termo de responsabilidade. Comprometendo-me a mantê-los em perfeito estado de conservação, 
+                            ficando ciente de que: """)
+                p0.wrapOn(pdf, 400, 100)
+                p0.drawOn(pdf, 100, 445)
+                p1 = Paragraph(f"""1- Se o equipamento for danificado ou inutilizado por emprego inadequado, mau uso, negligência ou extravio, a empresa me fornecerá novo equipamento e cobrará o valor 
+                            de um equipamento da mesma marca ou equivalente ao da praça;""")
+                p1.wrapOn(pdf, 400, 100)
+                p1.drawOn(pdf, 100, 400)
+                p2 = Paragraph("2- Em caso de perda, dano, furto, inutilização ou extravio do equipamento, deverei comunicar imediatamente ao setor competente;")
+                p2.wrapOn(pdf, 400, 100)
+                p2.drawOn(pdf, 100, 370)
+                p3 = Paragraph(f"""3- Terminando os serviços ou em caso de rescisão do contrato de trabalho, devolverei o equipamento completo e em perfeito estado de conservação, considerando-se o tempo 
+                            do uso do mesmo (tempo de vida útil), ao setor competente;""")
+                p3.wrapOn(pdf, 400, 100)
+                p3.drawOn(pdf, 100, 330)
+                p4 = Paragraph('4- Estando os equipamentos em minha posse, estarei sujeito a inspeções sem prévio aviso.')
+                p4.wrapOn(pdf, 400, 100)
+                p4.drawOn(pdf, 100, 300)
+                p5 = Paragraph('Rio de Janeiro, ____ de ___________ de 20____.')
+                p5.wrapOn(pdf, 400, 100)
+                p5.drawOn(pdf, 100, 275)
+                p6 = Paragraph('Assinatura:____________________________________________________')
+                p6.wrapOn(pdf, 400, 100)
+                p6.drawOn(pdf, 100, 250)
+
+                pdf.line(80, 225, 500, 225)
+
+                p7 = Paragraph('Data devolução: ____/____/____')
+                p7.wrapOn(pdf, 400, 100)
+                p7.drawOn(pdf, 100, 200)
+                p8 = Paragraph('Assinatura:____________________________________________________')
+                p8.wrapOn(pdf, 400, 100)
+                p8.drawOn(pdf, 100, 175)
+
+                pdf.drawInlineImage('check box.png', 80, 100, 50, 60, preserveAspectRatio= True)
+
+                p9 = Paragraph('Em perfeito estado')
+                p9.wrapOn(pdf, 400, 100)
+                p9.drawOn(pdf, 125, 150)
+                p10 = Paragraph('Apresentando defeito')
+                p10.wrapOn(pdf, 400, 100)
+                p10.drawOn(pdf, 125, 125)
+                p11 = Paragraph('Faltando peças ou acessórios')
+                p11.wrapOn(pdf, 400, 100)
+                p11.drawOn(pdf, 125, 100)
+                p12 = Paragraph('Responsável pelo recebimento')
+                p12.wrapOn(pdf, 400, 100)
+                p12.drawOn(pdf, 100, 70)
+                p13 = Paragraph('Nome:_______________________________________________________')
+                p13.wrapOn(pdf, 400, 100)
+                p13.drawOn(pdf, 100, 45)
+                p14 = Paragraph('Assinatura:____________________________________________________')
+                p14.wrapOn(pdf, 400, 100)
+                p14.drawOn(pdf, 100, 20)
                 
-                aba_ativa['A11'] = patrimonio
-                aba_ativa['B11'] = modelo + ' / ' + descricao + ' / ' + processador + ' / ' + memoria + ' / ' + ssd_hdd
-                aba_ativa['D11'] = quantidade
-                
-                planilha.save(f"termos/{ patrimonio }_Termo_de_Responsabilidade.xlsx")
+                pdf.save()
                 
                 msg = QMessageBox()
                 msg.setWindowTitle('AVISO')
@@ -394,51 +548,6 @@ class Janela(QtWidgets.QMainWindow, base.Ui_MainWindow):
         
         for item in campos:
             item.clear()
-
-#####################################################################################################################################################################################################
-
-    #PAGE PESQUISA
-    def buscar_nome(self): # botão buscar (ABA PESQUISA)
-        filtro = self.txt_nome_buscar.text()
-          
-        if ( filtro == '' or filtro == None ):
-            msg = QMessageBox()
-            msg.setWindowTitle("AVISO")
-            msg.setText("Campo vazio!")
-            msg.setInformativeText("Por favor, preencha o campo de busca")
-            msg.setIcon(QMessageBox.Information)
-            msg.exec_()  
-            
-        else:
-            conn = pymysql.connect(host='satelpjceara.com',port=3306, user='satelp03_marcosh'  ,password='12345678', db='satelp03_bd_github')
-            
-            query = f"""select t2.name, t1.patrimonio, t1.tipo_item, t1.posto_trabalho, t1.descricao, t1.uf, t1.modelo, t1.marca, t1.n_modelo, t1.processador, t1.n_serie, 
-            t1.email, t1.memoria, t1.status, t1.condicoes, t1.ssd_hdd
-            from satelp03_bd_github.tb_base_patrimonio as t1 left join satelp03_bd_github.users as t2 on t1.id_usuario = t2.id where name like '%{ filtro }%' """
-                  
-            tabela = pd.read_sql(query, conn)
-            print(tabela)
-        
-            tabela = tabela[ tabela[ "name" ].str.contains( filtro, na=False ) ]
-            linha = 0
-            
-            for linha_indice in ( tabela.index ):
-                coluna = 0
-                
-                for item in tabela:  
-                    # print( linha_indice, linha , coluna, item )
-                    self.x = tabela.iloc[ linha,coluna ] 
-                    self.tableWidget.setItem( linha, coluna, QTableWidgetItem( str( self.x ) ) )
-                    coluna = coluna +1
-                    
-                linha = linha + 1
-    
-    #PAGE PESQUISA            
-    def limpar_nome(self):
-        self.txt_nome_buscar.clear()
-        self.tableWidget.clear() 
-    
-#############################################################################################################################################################################################
 
 #PAGE EQUIPAMENTOS
     def detalhes_equipamentos(self):
@@ -640,7 +749,11 @@ class Janela(QtWidgets.QMainWindow, base.Ui_MainWindow):
         
         for item in campos:
             item.clear()
-               
+
+    def abrir_janela_buscar_nome(self):
+        self.janela2.show()
+        #self.hide()
+
 def main():
     app = QApplication(sys.argv)
     form = Janela()

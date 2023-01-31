@@ -1,0 +1,9 @@
+                planilha = load_workbook("base_de_dados/Termo_de_Responsabilidade_SAT-RG-039_-_Rio_de_Janeiro_-_hardware.xlsx")
+                aba_ativa = planilha.active
+                
+                aba_ativa['A6'] = 'Nome: ' +  name
+                aba_ativa['A7'] = 'Setor: ' + setor
+                
+                aba_ativa['A11'] = patrimonio
+                aba_ativa['B11'] = modelo + ' / ' + descricao + ' / ' + processador + ' / ' + memoria + ' / ' + ssd_hdd
+                aba_ativa['D11'] = quantidade
