@@ -1,5 +1,5 @@
 from PyQt5 import QtCore, QtGui, QtWidgets
-from PyQt5.QtWidgets import QApplication, QMessageBox, QTableWidgetItem, QComboBox, QToolButton, QMainWindow
+from PyQt5.QtWidgets import QApplication, QMessageBox, QTableWidgetItem, QToolButton, QMainWindow
 import sys
 import base
 import base2
@@ -416,8 +416,8 @@ class Janela(QtWidgets.QMainWindow, base.Ui_PrimeiraJanela):
                 
                 filtro = int( self.txt_patrimonio.text() )
                 
-                query = f"""SELECT  t2.name, t1.setor, t1.patrimonio, t1.modelo, t1.descricao, t1.processador, t1.memoria, t1.ssd_hdd FROM satelp03_bd_github.tb_base_patrimonio AS t1
-                LEFT JOIN satelp03_bd_github.users as t2 ON t1.id_usuario  = t2.id WHERE patrimonio = { filtro }"""
+                query = f"""SELECT  t2.name, t1.setor, t1.patrimonio, t1.modelo, t1.descricao, t1.processador, t1.memoria, t1.n_modelo, t1.n_serie, t1.ssd_hdd, t1.marca 
+                FROM satelp03_bd_github.tb_base_patrimonio AS t1 LEFT JOIN satelp03_bd_github.users as t2 ON t1.id_usuario  = t2.id WHERE patrimonio = { filtro }"""
                 
                 tabela = pd.read_sql(query, conn)
                 print(tabela)
@@ -426,17 +426,23 @@ class Janela(QtWidgets.QMainWindow, base.Ui_PrimeiraJanela):
                 setor = list( tabela[ 'setor' ] )[0]
                 
                 patrimonio = list( tabela[ 'patrimonio' ] )[0]
-                modelo = list( tabela[ 'modelo' ] )[0]
+                
+                marca = list( tabela[ 'marca' ] )[0]
                 descricao = list( tabela[ 'descricao' ] )[0]
-                processador = list( tabela[ 'processador' ] )[0]
                 memoria = list( tabela[ 'memoria' ] )[0]
                 ssd_hdd = list( tabela[ 'ssd_hdd' ] )[0]
+                
                 quantidade = '1'
+                
+                modelo = list( tabela[ 'modelo' ] )[0]
+                processador = list( tabela[ 'processador' ] )[0]
+                n_modelo = list( tabela[ 'n_modelo' ] )[0]
+                n_serie = list( tabela[ 'n_serie' ] )[0]
                 
                 pdf = canvas.Canvas(f"termos/{patrimonio }_Termo_Responsabilidade.pdf")
                 
                 pdf.setTitle(f"patrimonio { str( patrimonio ) }")
-                pdf.drawInlineImage('satel.png', 230, 740, 120, 120, preserveAspectRatio= True)
+                pdf.drawInlineImage('imagens/satel.png', 230, 740, 120, 120, preserveAspectRatio= True)
                 pdf.setFont('Helvetica-Bold', 15)
                 pdf.drawCentredString(280, 750, "Termo de Responsabilidade de Uso")
                 pdf.setFont('Helvetica-Bold', 13)
@@ -444,83 +450,87 @@ class Janela(QtWidgets.QMainWindow, base.Ui_PrimeiraJanela):
 
                 id = Paragraph('IDENTIFICAÇÃO DO COLABORADOR')
                 id.wrapOn(pdf, 400, 100)
-                id.drawOn(pdf, 100, 682)
+                id.drawOn(pdf, 100, 680)
                 n = Paragraph('NOME: ' + name)
                 n.wrapOn(pdf, 400, 100)
-                n.drawOn(pdf, 100, 660)
+                n.drawOn(pdf, 100, 655)
                 s = Paragraph('SETOR: ' + setor)
                 s.wrapOn(pdf, 400, 100)
                 s.drawOn(pdf, 100, 640)
 
-                pdf.drawInlineImage('tabela patrimonio.png', 90, 380, 400, 400, preserveAspectRatio= True)
+                pdf.drawInlineImage('imagens/tabela patrimonio.png', 90, 380, 400, 400, preserveAspectRatio= True)
 
                 p = Paragraph( str( patrimonio ) )
                 p.wrapOn(pdf, 400, 100)
                 p.drawOn(pdf, 117, 591)
-                d = Paragraph(modelo + ' / ' +  descricao + ' / ' +  processador + ' / ' + memoria + ' / ' +  ssd_hdd)
+                d = Paragraph( marca + ' / ' + descricao +  ' / ' + memoria + ' / ' +  ssd_hdd ) 
                 d.wrapOn(pdf, 400, 100)
                 d.drawOn(pdf, 165, 591)
+                d2 = Paragraph( modelo + ' / ' + processador + ' / ' +  n_serie + ' / ' +  n_modelo ) 
+                d2.wrapOn(pdf, 400, 100)
+                d2.drawOn(pdf, 165, 575)
                 q = Paragraph(quantidade)
                 q.wrapOn(pdf, 400, 100)
                 q.drawOn(pdf, 467, 591)
 
-                pdf.line(80, 515, 500, 515)
+                pdf.line(80, 520, 500, 520)
 
                 p0 = Paragraph(f"""Recebi da empresa SATEL – SERVIÇOS AUXILIARES DE TELECOMUNICAÇÕES DO BRASIL LTDA, CNPJ Nº 16.857.533/0001-24, a título de empréstimo, para uso exclusivo, 
                             conforme determinado em lei, os equipamentos especificados neste termo de responsabilidade. Comprometendo-me a mantê-los em perfeito estado de conservação, 
                             ficando ciente de que: """)
                 p0.wrapOn(pdf, 400, 100)
-                p0.drawOn(pdf, 100, 445)
+                p0.drawOn(pdf, 95, 445)
                 p1 = Paragraph(f"""1- Se o equipamento for danificado ou inutilizado por emprego inadequado, mau uso, negligência ou extravio, a empresa me fornecerá novo equipamento e cobrará o valor 
                             de um equipamento da mesma marca ou equivalente ao da praça;""")
                 p1.wrapOn(pdf, 400, 100)
-                p1.drawOn(pdf, 100, 400)
+                p1.drawOn(pdf, 95, 400)
                 p2 = Paragraph("2- Em caso de perda, dano, furto, inutilização ou extravio do equipamento, deverei comunicar imediatamente ao setor competente;")
                 p2.wrapOn(pdf, 400, 100)
-                p2.drawOn(pdf, 100, 370)
+                p2.drawOn(pdf, 95, 370)
                 p3 = Paragraph(f"""3- Terminando os serviços ou em caso de rescisão do contrato de trabalho, devolverei o equipamento completo e em perfeito estado de conservação, considerando-se o tempo 
                             do uso do mesmo (tempo de vida útil), ao setor competente;""")
                 p3.wrapOn(pdf, 400, 100)
-                p3.drawOn(pdf, 100, 330)
+                p3.drawOn(pdf, 95, 330)
                 p4 = Paragraph('4- Estando os equipamentos em minha posse, estarei sujeito a inspeções sem prévio aviso.')
                 p4.wrapOn(pdf, 400, 100)
-                p4.drawOn(pdf, 100, 300)
+                p4.drawOn(pdf, 95, 300)
                 p5 = Paragraph('Rio de Janeiro, ____ de ___________ de 20____.')
                 p5.wrapOn(pdf, 400, 100)
-                p5.drawOn(pdf, 100, 275)
+                p5.drawOn(pdf, 100, 272)
                 p6 = Paragraph('Assinatura:____________________________________________________')
                 p6.wrapOn(pdf, 400, 100)
                 p6.drawOn(pdf, 100, 250)
 
-                pdf.line(80, 225, 500, 225)
+                pdf.line(80, 230, 500, 230)
 
                 p7 = Paragraph('Data devolução: ____/____/____')
                 p7.wrapOn(pdf, 400, 100)
-                p7.drawOn(pdf, 100, 200)
+                p7.drawOn(pdf, 100, 202)
                 p8 = Paragraph('Assinatura:____________________________________________________')
                 p8.wrapOn(pdf, 400, 100)
-                p8.drawOn(pdf, 100, 175)
+                p8.drawOn(pdf, 100, 180)
 
-                pdf.drawInlineImage('check box.png', 80, 100, 50, 60, preserveAspectRatio= True)
+                pdf.drawInlineImage('imagens/check box.png', 83, 97, 50, 60, preserveAspectRatio= True)
 
                 p9 = Paragraph('Em perfeito estado')
                 p9.wrapOn(pdf, 400, 100)
-                p9.drawOn(pdf, 125, 150)
+                p9.drawOn(pdf, 125, 145)
                 p10 = Paragraph('Apresentando defeito')
                 p10.wrapOn(pdf, 400, 100)
-                p10.drawOn(pdf, 125, 125)
+                p10.drawOn(pdf, 125, 120)
                 p11 = Paragraph('Faltando peças ou acessórios')
                 p11.wrapOn(pdf, 400, 100)
-                p11.drawOn(pdf, 125, 100)
+                p11.drawOn(pdf, 125, 95)
+                
                 p12 = Paragraph('Responsável pelo recebimento')
                 p12.wrapOn(pdf, 400, 100)
-                p12.drawOn(pdf, 100, 70)
+                p12.drawOn(pdf, 100, 62)
                 p13 = Paragraph('Nome:_______________________________________________________')
                 p13.wrapOn(pdf, 400, 100)
-                p13.drawOn(pdf, 100, 45)
+                p13.drawOn(pdf, 100, 38)
                 p14 = Paragraph('Assinatura:____________________________________________________')
                 p14.wrapOn(pdf, 400, 100)
-                p14.drawOn(pdf, 100, 20)
+                p14.drawOn(pdf, 100, 15)
                 
                 pdf.save()
                 
@@ -541,6 +551,10 @@ class Janela(QtWidgets.QMainWindow, base.Ui_PrimeiraJanela):
         except Exception as erro:
             print(erro)
     
+    def abrir_janela_buscar_nome(self):
+        self.janela2.show()
+        #self.hide() #trocar de tela
+        
     def limpar_pc(self): #botão limpar (ABA GERAL)
         campos = [ self.txt_patrimonio, self.txt_tipo_item, self.txt_posto_trabalho ,self.txt_descricao, self.txt_id_usuario ,self.txt_modelo, self.txt_marca, self.txt_n_modelo, 
                   self.txt_processador, self.txt_n_serie, self.txt_email, self.txt_memoria, self.txt_condicoes, self.txt_windows, self.txt_anydesk, self.txt_conta, self.txt_chave, 
@@ -749,10 +763,6 @@ class Janela(QtWidgets.QMainWindow, base.Ui_PrimeiraJanela):
         
         for item in campos:
             item.clear()
-
-    def abrir_janela_buscar_nome(self):
-        self.janela2.show()
-        #self.hide()
 
 def main():
     app = QApplication(sys.argv)
