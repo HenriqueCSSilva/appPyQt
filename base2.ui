@@ -30,7 +30,7 @@
      <string>Nome:</string>
     </property>
    </widget>
-   <widget class="QTableWidget" name="tableWidget">
+   <widget class="QTableWidget" name="tabela_pc">
     <property name="geometry">
      <rect>
       <x>11</x>

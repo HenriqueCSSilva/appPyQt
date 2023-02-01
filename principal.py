@@ -43,7 +43,7 @@ class Janela2(QtWidgets.QMainWindow, base2.Ui_SegundaJanela):
                     msg = QMessageBox()
                     msg.setWindowTitle('AVISO')
                     msg.setText("Usuário não encontrado!")
-                    msg.setIcon(QMessageBox.Information)
+                    msg.setIcon(QMessageBox.Critical)
                     msg.exec_()
                     
                 else:
@@ -54,7 +54,7 @@ class Janela2(QtWidgets.QMainWindow, base2.Ui_SegundaJanela):
                         
                         for item in tabela:  
                             self.x = tabela.iloc[ linha,coluna ] 
-                            self.tableWidget.setItem( linha, coluna, QTableWidgetItem( str( self.x ) ) )
+                            self.tabela_pc.setItem( linha, coluna, QTableWidgetItem( str( self.x ) ) )
                             coluna = coluna +1
                             
                         linha = linha + 1
@@ -85,6 +85,7 @@ class Janela(QtWidgets.QMainWindow, base.Ui_PrimeiraJanela):
         self.btn_alterar_2.clicked.connect(self.alterar_equipamentos)
         self.btn_apagar_2.clicked.connect(self.deletar_equipamentos)
         self.btn_limpar_detalhes_2.clicked.connect(self.limpar_equipamentos)
+        self.btn_carregar.clicked.connect(self.mostrar_equipamentos)
         
         self.btn_buscar_por_nome.clicked.connect(self.abrir_janela_buscar_nome)
            
@@ -510,7 +511,7 @@ class Janela(QtWidgets.QMainWindow, base.Ui_PrimeiraJanela):
                 p8.wrapOn(pdf, 400, 100)
                 p8.drawOn(pdf, 100, 180)
 
-                pdf.drawInlineImage('imagens/check box.png', 83, 97, 50, 60, preserveAspectRatio= True)
+                pdf.drawInlineImage('imagens/check box.png', 85, 97, 50, 60, preserveAspectRatio= True)
 
                 p9 = Paragraph('Em perfeito estado')
                 p9.wrapOn(pdf, 400, 100)
@@ -553,7 +554,7 @@ class Janela(QtWidgets.QMainWindow, base.Ui_PrimeiraJanela):
     
     def abrir_janela_buscar_nome(self):
         self.janela2.show()
-        #self.hide() #trocar de tela
+        
         
     def limpar_pc(self): #botão limpar (ABA GERAL)
         campos = [ self.txt_patrimonio, self.txt_tipo_item, self.txt_posto_trabalho ,self.txt_descricao, self.txt_id_usuario ,self.txt_modelo, self.txt_marca, self.txt_n_modelo, 
@@ -764,6 +765,39 @@ class Janela(QtWidgets.QMainWindow, base.Ui_PrimeiraJanela):
         for item in campos:
             item.clear()
 
+    def mostrar_equipamentos(self):
+        try:
+            conn = pymysql.connect(host='satelpjceara.com',port=3306, user='satelp03_marcosh'  ,password='12345678', db='satelp03_bd_github')
+            
+            query = f"""SELECT patrimonio, uf, descricao, posto_trabalho, modelo, marca, n_modelo, n_serie, status FROM satelp03_bd_github.tb_base_equipamentos"""
+            tabela = pd.read_sql(query, conn)
+            
+            if (tabela.empty == True):
+                
+                msg = QMessageBox()
+                msg.setWindowTitle('AVISO')
+                msg.setText('Impossivel carregar dados!')
+                msg.setInformativeText('Não há dados registrados')
+                msg.setIcon(QMessageBox.Critical)
+                msg.exec_()
+                
+            else:
+                linha = 0
+                
+                for linha_indice in ( tabela.index ):
+                    coluna = 0
+                    
+                    for item in tabela:  
+                        self.x = tabela.iloc[ linha,coluna ] 
+                        self.tabela_equipamentos.setItem( linha, coluna, QTableWidgetItem( str( self.x ) ) )
+                        coluna = coluna +1
+                        
+                    linha = linha + 1
+            
+        except Exception as erro:
+            print(erro)
+        
+        
 def main():
     app = QApplication(sys.argv)
     form = Janela()
