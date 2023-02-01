@@ -64,6 +64,7 @@ class Janela2(QtWidgets.QMainWindow, base2.Ui_SegundaJanela):
             
     def limpar_nome(self):
         self.txt_nome_buscar.clear()
+
 class Janela(QtWidgets.QMainWindow, base.Ui_PrimeiraJanela):
     def __init__(self, parent=None):
         super(Janela, self).__init__(parent)
@@ -554,9 +555,8 @@ class Janela(QtWidgets.QMainWindow, base.Ui_PrimeiraJanela):
     
     def abrir_janela_buscar_nome(self):
         self.janela2.show()
-        
-        
-    def limpar_pc(self): #botão limpar (ABA GERAL)
+           
+    def limpar_pc(self): 
         campos = [ self.txt_patrimonio, self.txt_tipo_item, self.txt_posto_trabalho ,self.txt_descricao, self.txt_id_usuario ,self.txt_modelo, self.txt_marca, self.txt_n_modelo, 
                   self.txt_processador, self.txt_n_serie, self.txt_email, self.txt_memoria, self.txt_condicoes, self.txt_windows, self.txt_anydesk, self.txt_conta, self.txt_chave, 
                   self.txt_licenca, self.txt_windows, self.txt_anydesk, self.txt_conta, self.txt_chave, self.txt_licenca ]
