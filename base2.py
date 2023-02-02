@@ -22,7 +22,7 @@ class Ui_SegundaJanela(object):
         self.label_nome.setStyleSheet("font-family:\"MS Shell Dlg 2\";")
         self.label_nome.setObjectName("label_nome")
         self.tabela_pc = QtWidgets.QTableWidget(self.centralwidget)
-        self.tabela_pc.setGeometry(QtCore.QRect(11, 72, 1341, 581))
+        self.tabela_pc.setGeometry(QtCore.QRect(11, 72, 1341, 561))
         self.tabela_pc.setObjectName("tabela_pc")
         self.tabela_pc.setColumnCount(16)
         self.tabela_pc.setRowCount(20)

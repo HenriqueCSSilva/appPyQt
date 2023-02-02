@@ -9,6 +9,7 @@ import funcoes as f
 from reportlab.pdfgen import canvas
 from reportlab.platypus import Paragraph
 
+
 class Janela2(QtWidgets.QMainWindow, base2.Ui_SegundaJanela):
     def __init__(self, parent=None):
         super(Janela2, self).__init__(parent)
@@ -17,7 +18,7 @@ class Janela2(QtWidgets.QMainWindow, base2.Ui_SegundaJanela):
         self.btn_buscar_nome.clicked.connect(self.buscar_nome)
         self.btn_limpar_nome.clicked.connect(self.limpar_nome)
 
-    def buscar_nome(self): # botão buscar (ABA PESQUISA)
+    def buscar_nome(self): 
         filtro = self.txt_nome_buscar.text()
         
         try:
@@ -65,6 +66,7 @@ class Janela2(QtWidgets.QMainWindow, base2.Ui_SegundaJanela):
     def limpar_nome(self):
         self.txt_nome_buscar.clear()
 
+
 class Janela(QtWidgets.QMainWindow, base.Ui_PrimeiraJanela):
     def __init__(self, parent=None):
         super(Janela, self).__init__(parent)
@@ -90,7 +92,7 @@ class Janela(QtWidgets.QMainWindow, base.Ui_PrimeiraJanela):
         
         self.btn_buscar_por_nome.clicked.connect(self.abrir_janela_buscar_nome)
            
-#PAGE GERAL    
+#PAGE PC    
     def detalhes_pc(self): 
         conn = pymysql.connect(host='satelpjceara.com',port=3306, user='satelp03_marcosh'  ,password='12345678', db='satelp03_bd_github')
         cur = conn.cursor()
@@ -553,9 +555,6 @@ class Janela(QtWidgets.QMainWindow, base.Ui_PrimeiraJanela):
         except Exception as erro:
             print(erro)
     
-    def abrir_janela_buscar_nome(self):
-        self.janela2.show()
-           
     def limpar_pc(self): 
         campos = [ self.txt_patrimonio, self.txt_tipo_item, self.txt_posto_trabalho ,self.txt_descricao, self.txt_id_usuario ,self.txt_modelo, self.txt_marca, self.txt_n_modelo, 
                   self.txt_processador, self.txt_n_serie, self.txt_email, self.txt_memoria, self.txt_condicoes, self.txt_windows, self.txt_anydesk, self.txt_conta, self.txt_chave, 
@@ -563,6 +562,10 @@ class Janela(QtWidgets.QMainWindow, base.Ui_PrimeiraJanela):
         
         for item in campos:
             item.clear()
+            
+    def abrir_janela_buscar_nome(self):
+        self.janela2.show()
+           
 
 #PAGE EQUIPAMENTOS
     def detalhes_equipamentos(self):
