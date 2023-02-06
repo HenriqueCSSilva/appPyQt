@@ -1,20 +1,26 @@
 from PyQt5 import QtCore, QtGui, QtWidgets
 from PyQt5.QtWidgets import QApplication, QMessageBox, QTableWidgetItem, QToolButton, QMainWindow
+from reportlab.pdfgen import canvas
+from reportlab.platypus import Paragraph
+from pdf2image import convert_from_path
 import sys
 import base
 import base2
+import base3
 import pandas as pd
 import pymysql
 import funcoes as f
-from reportlab.pdfgen import canvas
-from reportlab.platypus import Paragraph
+import os
 
+#Janela3 setar imagem termo responsabilidade
 
 class Janela2(QtWidgets.QMainWindow, base2.Ui_SegundaJanela):
+
     def __init__(self, parent=None):
         super(Janela2, self).__init__(parent)
         self.setupUi(self)
         
+        #BOTÕES
         self.btn_buscar_nome.clicked.connect(self.buscar_nome)
         self.btn_limpar_nome.clicked.connect(self.limpar_nome)
 
@@ -66,7 +72,6 @@ class Janela2(QtWidgets.QMainWindow, base2.Ui_SegundaJanela):
     def limpar_nome(self):
         self.txt_nome_buscar.clear()
 
-
 class Janela(QtWidgets.QMainWindow, base.Ui_PrimeiraJanela):
     def __init__(self, parent=None):
         super(Janela, self).__init__(parent)
@@ -81,7 +86,7 @@ class Janela(QtWidgets.QMainWindow, base.Ui_PrimeiraJanela):
         self.btn_apagar.clicked.connect(self.deletar_pc)
         self.btn_limpar_detalhes.clicked.connect(self.limpar_pc)
         
-        self.btn_gerar_doc.clicked.connect(self.gerar_pdf)
+        self.btn_preview .clicked.connect(self.gerar_pdf)
         
         self.btn_buscar_detalhes_2.clicked.connect(self.detalhes_equipamentos)
         self.btn_cadastrar_2.clicked.connect(self.cadastrar_equipamentos)
@@ -91,7 +96,8 @@ class Janela(QtWidgets.QMainWindow, base.Ui_PrimeiraJanela):
         self.btn_carregar.clicked.connect(self.mostrar_equipamentos)
         
         self.btn_buscar_por_nome.clicked.connect(self.abrir_janela_buscar_nome)
-           
+        
+        
 #PAGE PC    
     def detalhes_pc(self): 
         conn = pymysql.connect(host='satelpjceara.com',port=3306, user='satelp03_marcosh'  ,password='12345678', db='satelp03_bd_github')
@@ -410,6 +416,14 @@ class Janela(QtWidgets.QMainWindow, base.Ui_PrimeiraJanela):
             msg.setIcon(QMessageBox.Critical)
             msg.exec_()
             
+    def limpar_pc(self): 
+        campos = [ self.txt_patrimonio, self.txt_tipo_item, self.txt_posto_trabalho ,self.txt_descricao, self.txt_id_usuario ,self.txt_modelo, self.txt_marca, self.txt_n_modelo, 
+                  self.txt_processador, self.txt_n_serie, self.txt_email, self.txt_memoria, self.txt_condicoes, self.txt_windows, self.txt_anydesk, self.txt_conta, self.txt_chave, 
+                  self.txt_licenca, self.txt_windows, self.txt_anydesk, self.txt_conta, self.txt_chave, self.txt_licenca ]
+        
+        for item in campos:
+            item.clear()
+            
     def gerar_pdf(self):
         campos = { 'patrimonio':self.txt_patrimonio.text(), 'descricao':self.txt_descricao.text(), 'processador':self.txt_processador.text(), 'memoria': self.txt_memoria.text() }
         
@@ -443,7 +457,7 @@ class Janela(QtWidgets.QMainWindow, base.Ui_PrimeiraJanela):
                 n_modelo = list( tabela[ 'n_modelo' ] )[0]
                 n_serie = list( tabela[ 'n_serie' ] )[0]
                 
-                pdf = canvas.Canvas(f"termos/{patrimonio }_Termo_Responsabilidade.pdf")
+                pdf = canvas.Canvas(f"termos/{ patrimonio }_Termo_Responsabilidade.pdf")
                 
                 pdf.setTitle(f"patrimonio { str( patrimonio ) }")
                 pdf.drawInlineImage('imagens/satel.png', 230, 740, 120, 120, preserveAspectRatio= True)
@@ -454,13 +468,16 @@ class Janela(QtWidgets.QMainWindow, base.Ui_PrimeiraJanela):
 
                 id = Paragraph('IDENTIFICAÇÃO DO COLABORADOR')
                 id.wrapOn(pdf, 400, 100)
-                id.drawOn(pdf, 100, 680)
-                n = Paragraph('NOME: ' + name)
-                n.wrapOn(pdf, 400, 100)
-                n.drawOn(pdf, 100, 655)
-                s = Paragraph('SETOR: ' + setor)
-                s.wrapOn(pdf, 400, 100)
-                s.drawOn(pdf, 100, 640)
+                id.drawOn(pdf, 200, 695)
+                nome = Paragraph('Nome: ' + name)
+                nome.wrapOn(pdf, 400, 100)
+                nome.drawOn(pdf, 100, 670)
+                setor = Paragraph('Setor: ' + setor)
+                setor.wrapOn(pdf, 400, 100)
+                setor.drawOn(pdf, 100, 655)
+                n_id = Paragraph('N° de Identidade: ')
+                n_id.wrapOn(pdf, 400, 100)
+                n_id.drawOn(pdf, 100, 640)
 
                 pdf.drawInlineImage('imagens/tabela patrimonio.png', 90, 380, 400, 400, preserveAspectRatio= True)
 
@@ -521,10 +538,10 @@ class Janela(QtWidgets.QMainWindow, base.Ui_PrimeiraJanela):
                 p9.drawOn(pdf, 125, 145)
                 p10 = Paragraph('Apresentando defeito')
                 p10.wrapOn(pdf, 400, 100)
-                p10.drawOn(pdf, 125, 120)
+                p10.drawOn(pdf, 125, 122)
                 p11 = Paragraph('Faltando peças ou acessórios')
                 p11.wrapOn(pdf, 400, 100)
-                p11.drawOn(pdf, 125, 95)
+                p11.drawOn(pdf, 125, 98)
                 
                 p12 = Paragraph('Responsável pelo recebimento')
                 p12.wrapOn(pdf, 400, 100)
@@ -539,8 +556,8 @@ class Janela(QtWidgets.QMainWindow, base.Ui_PrimeiraJanela):
                 pdf.save()
                 
                 msg = QMessageBox()
-                msg.setWindowTitle('AVISO')
-                msg.setText('O documento foi gerado com sucesso!')
+                msg.setWindowTitle("AVISO")
+                msg.setText('Documeto gerado com sucesso!')
                 msg.setIcon(QMessageBox.Information)
                 msg.exec_()
             
@@ -554,14 +571,30 @@ class Janela(QtWidgets.QMainWindow, base.Ui_PrimeiraJanela):
                 
         except Exception as erro:
             print(erro)
-    
-    def limpar_pc(self): 
-        campos = [ self.txt_patrimonio, self.txt_tipo_item, self.txt_posto_trabalho ,self.txt_descricao, self.txt_id_usuario ,self.txt_modelo, self.txt_marca, self.txt_n_modelo, 
-                  self.txt_processador, self.txt_n_serie, self.txt_email, self.txt_memoria, self.txt_condicoes, self.txt_windows, self.txt_anydesk, self.txt_conta, self.txt_chave, 
-                  self.txt_licenca, self.txt_windows, self.txt_anydesk, self.txt_conta, self.txt_chave, self.txt_licenca ]
+            
+    def pdf_para_png(self):
+        patrimonio = self.txt_patrimonio.text()
         
-        for item in campos:
-            item.clear()
+        try:
+            if patrimonio != '' or patrimonio != None:
+            
+                poppler_path = "C:\\Users\\Administrador Satel\\Desktop\\giulia\\Release-23.01.0-0\\poppler-23.01.0\\Library\\bin"
+                
+                pdf_path = f"termos/{ patrimonio }_Termo_Responsabilidade"
+
+                paginas = convert_from_path(pdf_path=pdf_path, poppler_path=poppler_path)
+
+                pasta_salvamento = "C:\\Users\\Administrador Satel\\Documents\\GitHub\\appPyQt\\png"
+
+                c=1
+                for pagina in paginas:
+                    nome_imagem = f"{ patrimonio }_Termo_Responsabilidade.png"
+                    
+                    pagina.save( os.path.join( pasta_salvamento, nome_imagem ), "PNG" )
+                    c+=1
+                    
+        except Exception as erro:
+            print(erro)
             
     def abrir_janela_buscar_nome(self):
         self.janela2.show()
@@ -728,7 +761,7 @@ class Janela(QtWidgets.QMainWindow, base.Ui_PrimeiraJanela):
         conn = pymysql.connect(host='satelpjceara.com',port=3306, user='satelp03_marcosh' ,password='12345678', db='satelp03_bd_github')
         cur = conn.cursor()
         
-        query_delete = f"""DELETE FROM satelp03_bd_github.tb_base_equipamentos WHERE patrimonio = { campos['patrimonio'] }"""
+        query_delete = f"""DELETE * FROM satelp03_bd_github.tb_base_equipamentos WHERE patrimonio = { campos['patrimonio'] }"""
         
         msg = QMessageBox()
         msg.setWindowTitle("WARNING")
@@ -799,8 +832,107 @@ class Janela(QtWidgets.QMainWindow, base.Ui_PrimeiraJanela):
             
         except Exception as erro:
             print(erro)
+
+#PAGE ESTOQUE
+    def detalhes_estoque(self):
+        conn = pymysql.connect(host='satelpjceara.com',port=3306, user='satelp03_marcosh'  ,password='12345678', db='satelp03_bd_github')
+        cur = conn.cursor()
         
+        try:
+            patrimonio_ver = self.txt_patrimonio_3.text()
         
+            if patrimonio_ver == '' or patrimonio_ver == None:
+                msg = QMessageBox()
+                msg.setWindowTitle('AVISO')
+                msg.setText('Campo vazio!')
+                msg.setInformativeText('Por favor, preencha o campo de busca')
+                msg.setIcon(QMessageBox.Information)
+                msg.exec_()
+            
+            else:
+                filtro = int( self.txt_patrimonio_e.text() )
+                
+                query = f"SELECT * FROM satelp03_bd_github.tb_base_estoque = { filtro }"
+                tabela = pd.read_sql(query, conn)
+                
+                if tabela.empty == False:
+                    if list( tabela[ 'uf' ] )[0] == 'RJ':
+                        indexUf = 0
+                    if list( tabela[ 'uf' ] )[0] == 'RJ - NITEROI':
+                        indexUf = 1
+                    if list( tabela[ 'uf' ] )[0] == 'SP':
+                        indexUf = 2    
+                    if list( tabela[ 'uf' ] )[0] == 'GO':
+                        indexUf = 3
+                    if list( tabela[ 'uf' ] )[0] == 'AC':
+                        indexUf = 4
+                    if list( tabela[ 'uf' ] )[0] == 'RO':
+                        indexUf = 5
+                    if list( tabela[ 'uf' ] )[0] == 'MG':
+                        indexUf = 6
+                    if list( tabela[ 'uf' ] )[0] == 'CE':
+                        indexUf = 7
+                    if list( tabela[ 'uf' ] )[0] == 'PE':
+                        indexUf = 8
+                        
+                    tipo = list( tabela[ 'tipo' ] ) [0]
+                    quantidade = list( tabela[ 'quantidade' ] )[0]
+                    modelo = list( tabela[ 'modelo' ] )[0]
+                    marca = list( tabela[ 'marca' ] )[0]
+                    descricao = list( tabela[ 'descricao' ] )[0]
+                    destino = list( tabela[ 'destino' ] )[0]
+                    
+                    self.ddl_uf_3.setCurrentIndex( indexUf )
+                    self.txt_tipo.setText( tipo )
+                    self.txt_quantidade.setText( quantidade )
+                    self.txt_modelo_3.setText( modelo )
+                    self.txt_marca_3.setText( marca )
+                    self.txt_descricao_3.setText( descricao )
+                    self.txt_destino.setText( destino )
+                
+                else:
+                    msg = QMessageBox()
+                    msg.setWindowTitle("AVISO")
+                    msg.setText("Patrimonio não encontrado!")
+                    msg.setIcon(QMessageBox.Information)
+                    msg.exec_()
+        
+        except Exception as error:
+            print(error)
+                
+    def cadastrar_estoque(self):
+        campos = { 'patrimonio':self.txt_patrimonio_3.text(),'uf':self.ddl_uf_3.currentText(), 'quantidade':self.txt_quantidade.text(), 'modelo':self.txt_modelo_3.text(), 
+                   'marca':self.txt_marca_3.text(), 'descricao':self.txt_descricao_3.text(), 'destino':self.txt_destino.text() }
+        
+        conn = pymysql.connect(host='satelpjceara.com',port=3306, user='satelp03_marcosh' ,password='12345678', db='satelp03_bd_github')
+        cur = conn.cursor()
+        
+        if f.se_vazio( campos ) == False:
+            try:
+                query_insert = f""" INSERT INTO satelp03_bd_github.tb_base_estoque (patrimonio, uf, tipo, quantidade, modelo, marca, descricao, destino) VALUES 
+                                ( { campos[ 'patrimonio' ] },  '{ campos[ 'uf' ] }', '{ campos[ 'tipo' ] }', '{ campos[ 'quantidade' ] }', '{ campos[ 'modelo' ] }, '{ campoi} ) """  
+                
+                cur.execute(query_insert)
+                conn.commit()
+                conn.close()
+                
+                msg = QMessageBox()
+                msg.setWindowTitle("AVISO")
+                msg.setText("Equipamento cadastrado com sucesso!")
+                msg.setIcon(QMessageBox.Information)
+                msg.exec_()
+                
+            except Exception as erro:
+                print(erro)
+                
+        else:
+            msg = QMessageBox()
+            msg.setWindowTitle("FALHA")
+            msg.setText("Equipamento não cadastrado!")
+            msg.setInformativeText("Nenhum campo pode estar vazio")
+            msg.setIcon(QMessageBox.Critical)
+            msg.exec_()
+
 def main():
     app = QApplication(sys.argv)
     form = Janela()
