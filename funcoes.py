@@ -14,3 +14,4 @@ def caracter_9(valor):
         return True
     else:
         return False
+    

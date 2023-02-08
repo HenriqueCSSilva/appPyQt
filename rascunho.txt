@@ -1,1 +1,18 @@
 self.hide() trocar de tela
+
+os.listdir()
+glob .glob()
+
+self.topo = 100
+self.esquerda = 100
+self.largura = 1654
+self.altura = 2339
+self.titulo = "Preview"
+
+self.preview_pdf = QLabel(self)
+self.preview_pdf.move(100,100)
+
+imagem = f"{ patrimonio_png }_Termo_Responsabilidade.png"    
+self.preview_pdf = QLabel(self)
+self.preview_pdf.setPixmap(QtGui.QPixmap(imagem))
+self.janela3.show()

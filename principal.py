@@ -1,21 +1,18 @@
 from PyQt5 import QtCore, QtGui, QtWidgets
-from PyQt5.QtWidgets import QApplication, QMessageBox, QTableWidgetItem, QToolButton, QMainWindow
+from PyQt5.QtWidgets import QApplication, QMessageBox, QTableWidgetItem, QToolButton, QMainWindow, QLabel
 from reportlab.pdfgen import canvas
 from reportlab.platypus import Paragraph
 from pdf2image import convert_from_path
 import sys
 import base
 import base2
-import base3
 import pandas as pd
 import pymysql
 import funcoes as f
 import os
-
-#Janela3 setar imagem termo responsabilidade
-
+import cv2
+     
 class Janela2(QtWidgets.QMainWindow, base2.Ui_SegundaJanela):
-
     def __init__(self, parent=None):
         super(Janela2, self).__init__(parent)
         self.setupUi(self)
@@ -96,6 +93,13 @@ class Janela(QtWidgets.QMainWindow, base.Ui_PrimeiraJanela):
         self.btn_carregar.clicked.connect(self.mostrar_equipamentos)
         
         self.btn_buscar_por_nome.clicked.connect(self.abrir_janela_buscar_nome)
+        
+        self.btn_buscar_detalhes_3.clicked.connect(self.detalhes_estoque)
+        self.btn_cadastrar_3.clicked.connect(self.cadastrar_estoque)
+        self.btn_alterar_3.clicked.connect(self.alterar_estoque)
+        self.btn_apagar_3.clicked.connect(self.deletar_estoque)
+        self.btn_limpar_detalhes_3.clicked.connect(self.limpar_estoque)
+        self.btn_carregar_3.clicked.connect(self.mostrar_estoque)
         
         
 #PAGE PC    
@@ -462,13 +466,13 @@ class Janela(QtWidgets.QMainWindow, base.Ui_PrimeiraJanela):
                 pdf.setTitle(f"patrimonio { str( patrimonio ) }")
                 pdf.drawInlineImage('imagens/satel.png', 230, 740, 120, 120, preserveAspectRatio= True)
                 pdf.setFont('Helvetica-Bold', 15)
-                pdf.drawCentredString(280, 750, "Termo de Responsabilidade de Uso")
+                pdf.drawCentredString(290, 750, "Termo de Responsabilidade de Uso")
                 pdf.setFont('Helvetica-Bold', 13)
                 pdf.drawCentredString(290, 730, "SAT-RG-39")
 
                 id = Paragraph('IDENTIFICAÇÃO DO COLABORADOR')
                 id.wrapOn(pdf, 400, 100)
-                id.drawOn(pdf, 200, 695)
+                id.drawOn(pdf, 100, 695)
                 nome = Paragraph('Nome: ' + name)
                 nome.wrapOn(pdf, 400, 100)
                 nome.drawOn(pdf, 100, 670)
@@ -557,10 +561,86 @@ class Janela(QtWidgets.QMainWindow, base.Ui_PrimeiraJanela):
                 
                 msg = QMessageBox()
                 msg.setWindowTitle("AVISO")
-                msg.setText('Documeto gerado com sucesso!')
+                msg.setText('Deseja visualizar o pdf?')
                 msg.setIcon(QMessageBox.Information)
-                msg.exec_()
-            
+                msg.setStandardButtons(QMessageBox.Yes | QMessageBox.Cancel | QMessageBox.Save)
+                msg.setDefaultButton(QMessageBox.Cancel)
+                executar = msg.exec_()
+
+                if executar == msg.Yes:
+                    patrimonio_yes = self.txt_patrimonio.text()
+                    
+                    if patrimonio_yes != '' or patrimonio_yes != None:
+                
+                        poppler_path = "C:\\Users\\Administrador Satel\\Desktop\\giulia\\Release-23.01.0-0\\poppler-23.01.0\\Library\\bin"
+                    
+                        pdf_path = os.getcwd() + f"\\termos\\{ patrimonio_yes }_Termo_Responsabilidade.pdf"
+
+                        paginas = convert_from_path(pdf_path=pdf_path, poppler_path=poppler_path)
+                        
+                        pasta_salvamento = os.getcwd() + '\preview'
+
+                        c=1
+                        for pagina in paginas:
+                            nome_imagem = f"{ patrimonio_yes }_Termo_Responsabilidade.png"
+                            
+                            pagina.save( os.path.join( pasta_salvamento, nome_imagem ), "PNG" )
+                            c+=1
+                        
+                        imagem = cv2.imread(f"preview/{ patrimonio_yes }_Termo_Responsabilidade.png")
+                        
+                        down_width = 300
+                        down_height = 360
+                        down_points = (down_width, down_height)
+                        resized_down = cv2.resize(imagem, down_points, interpolation= cv2.INTER_LINEAR)
+                    
+                        up_width = 600
+                        up_height = 720
+                        up_points = (up_width, up_height)
+                        resized_up = cv2.resize(imagem, up_points, interpolation= cv2.INTER_LINEAR)
+                        
+                        cv2.imshow('Preview', resized_down)
+                        cv2.imshow('Preview', resized_up)
+                        
+                        arquivo_png = f"preview/{ patrimonio_yes }_Termo_Responsabilidade.png"
+                        arquivo_pdf = f"termos/{ patrimonio_yes }_Termo_Responsabilidade.pdf"
+                        
+                        os.remove(arquivo_png)
+                        os.remove(arquivo_pdf)
+                        
+                        msg = QMessageBox()
+                        msg.setWindowTitle("AVISO")
+                        msg.setText("Deseja salvar o arquivo?")
+                        msg.setIcon(QMessageBox.Information)
+                        msg.setStandardButtons(QMessageBox.Yes | QMessageBox.Cancel)
+                        msg.setDefaultButton(QMessageBox.Yes)
+                        executar = msg.exec_()
+                        
+                        if executar == msg.Yes:
+                            pdf.save()
+                        
+                if executar == msg.Cancel:
+                    patrimonio_cancel = self.txt_patrimonio.text()
+                    
+                    arquivo_pdf = f"termos/{ patrimonio_cancel }_Termo_Responsabilidade.pdf"
+                    arquivo_png = f"preview/{ patrimonio_cancel }_Termo_Responsabilidade.png"
+                    
+                    os.remove( arquivo_pdf )
+                    os.remove( arquivo_png )
+                    
+                if executar == msg.Save:
+                    patrimonio_save = self.txt_patrimonio.text()
+                    
+                    arquivo_png = f"preview/{ patrimonio_save }_Termo_Responsabilidade.png"
+                    
+                    os.remove( arquivo_png )
+                    
+                    msg = QMessageBox()
+                    msg.setWindowTitle('AVISO')
+                    msg.setText('Arquivo salvo com sucesso!')
+                    msg.setIcon(QMessageBox.Informative)  
+                    msg.exec_()
+                                
             else:
                 msg = QMessageBox()
                 msg.setWindowTitle("FALHA")
@@ -569,30 +649,6 @@ class Janela(QtWidgets.QMainWindow, base.Ui_PrimeiraJanela):
                 msg.setIcon(QMessageBox.Critical)
                 msg.exec_()
                 
-        except Exception as erro:
-            print(erro)
-            
-    def pdf_para_png(self):
-        patrimonio = self.txt_patrimonio.text()
-        
-        try:
-            if patrimonio != '' or patrimonio != None:
-            
-                poppler_path = "C:\\Users\\Administrador Satel\\Desktop\\giulia\\Release-23.01.0-0\\poppler-23.01.0\\Library\\bin"
-                
-                pdf_path = f"termos/{ patrimonio }_Termo_Responsabilidade"
-
-                paginas = convert_from_path(pdf_path=pdf_path, poppler_path=poppler_path)
-
-                pasta_salvamento = "C:\\Users\\Administrador Satel\\Documents\\GitHub\\appPyQt\\png"
-
-                c=1
-                for pagina in paginas:
-                    nome_imagem = f"{ patrimonio }_Termo_Responsabilidade.png"
-                    
-                    pagina.save( os.path.join( pasta_salvamento, nome_imagem ), "PNG" )
-                    c+=1
-                    
         except Exception as erro:
             print(erro)
             
@@ -761,7 +817,7 @@ class Janela(QtWidgets.QMainWindow, base.Ui_PrimeiraJanela):
         conn = pymysql.connect(host='satelpjceara.com',port=3306, user='satelp03_marcosh' ,password='12345678', db='satelp03_bd_github')
         cur = conn.cursor()
         
-        query_delete = f"""DELETE * FROM satelp03_bd_github.tb_base_equipamentos WHERE patrimonio = { campos['patrimonio'] }"""
+        query_delete = f"""DELETE FROM satelp03_bd_github.tb_base_equipamentos WHERE patrimonio = { campos['patrimonio'] }"""
         
         msg = QMessageBox()
         msg.setWindowTitle("WARNING")
@@ -833,6 +889,7 @@ class Janela(QtWidgets.QMainWindow, base.Ui_PrimeiraJanela):
         except Exception as erro:
             print(erro)
 
+
 #PAGE ESTOQUE
     def detalhes_estoque(self):
         conn = pymysql.connect(host='satelpjceara.com',port=3306, user='satelp03_marcosh'  ,password='12345678', db='satelp03_bd_github')
@@ -850,9 +907,9 @@ class Janela(QtWidgets.QMainWindow, base.Ui_PrimeiraJanela):
                 msg.exec_()
             
             else:
-                filtro = int( self.txt_patrimonio_e.text() )
+                filtro = int( self.txt_patrimonio_3.text() )
                 
-                query = f"SELECT * FROM satelp03_bd_github.tb_base_estoque = { filtro }"
+                query = f"SELECT * FROM satelp03_bd_github.tb_base_estoque WHERE patrimonio = { filtro }"
                 tabela = pd.read_sql(query, conn)
                 
                 if tabela.empty == False:
@@ -883,7 +940,7 @@ class Janela(QtWidgets.QMainWindow, base.Ui_PrimeiraJanela):
                     destino = list( tabela[ 'destino' ] )[0]
                     
                     self.ddl_uf_3.setCurrentIndex( indexUf )
-                    self.txt_tipo.setText( tipo )
+                    self.txt_tipo_3.setText( tipo )
                     self.txt_quantidade.setText( quantidade )
                     self.txt_modelo_3.setText( modelo )
                     self.txt_marca_3.setText( marca )
@@ -901,8 +958,8 @@ class Janela(QtWidgets.QMainWindow, base.Ui_PrimeiraJanela):
             print(error)
                 
     def cadastrar_estoque(self):
-        campos = { 'patrimonio':self.txt_patrimonio_3.text(),'uf':self.ddl_uf_3.currentText(), 'quantidade':self.txt_quantidade.text(), 'modelo':self.txt_modelo_3.text(), 
-                   'marca':self.txt_marca_3.text(), 'descricao':self.txt_descricao_3.text(), 'destino':self.txt_destino.text() }
+        campos = { 'patrimonio':self.txt_patrimonio_3.text(),'uf':self.ddl_uf_3.currentText(),'tipo':self.txt_tipo_3.text(), 'quantidade':self.txt_quantidade.text(), 
+                  'modelo':self.txt_modelo_3.text(), 'marca':self.txt_marca_3.text(), 'descricao':self.txt_descricao_3.text(), 'destino':self.txt_destino.text() }
         
         conn = pymysql.connect(host='satelpjceara.com',port=3306, user='satelp03_marcosh' ,password='12345678', db='satelp03_bd_github')
         cur = conn.cursor()
@@ -910,7 +967,8 @@ class Janela(QtWidgets.QMainWindow, base.Ui_PrimeiraJanela):
         if f.se_vazio( campos ) == False:
             try:
                 query_insert = f""" INSERT INTO satelp03_bd_github.tb_base_estoque (patrimonio, uf, tipo, quantidade, modelo, marca, descricao, destino) VALUES 
-                                ( { campos[ 'patrimonio' ] },  '{ campos[ 'uf' ] }', '{ campos[ 'tipo' ] }', '{ campos[ 'quantidade' ] }', '{ campos[ 'modelo' ] }, '{ campoi} ) """  
+                                ( { campos[ 'patrimonio' ] },  '{ campos[ 'uf' ] }', '{ campos[ 'tipo' ] }', '{ campos[ 'quantidade' ] }', '{ campos[ 'modelo' ] }', '{ campos[ 'marca' ] }',
+                                '{ campos[ 'descricao' ] }', '{ campos[ 'destino' ] }' ) """  
                 
                 cur.execute(query_insert)
                 conn.commit()
@@ -918,7 +976,7 @@ class Janela(QtWidgets.QMainWindow, base.Ui_PrimeiraJanela):
                 
                 msg = QMessageBox()
                 msg.setWindowTitle("AVISO")
-                msg.setText("Equipamento cadastrado com sucesso!")
+                msg.setText("Adicionado ao estoque com sucesso!")
                 msg.setIcon(QMessageBox.Information)
                 msg.exec_()
                 
@@ -928,11 +986,133 @@ class Janela(QtWidgets.QMainWindow, base.Ui_PrimeiraJanela):
         else:
             msg = QMessageBox()
             msg.setWindowTitle("FALHA")
-            msg.setText("Equipamento não cadastrado!")
+            msg.setText("Não foi possivel adicionar ao estoque!")
             msg.setInformativeText("Nenhum campo pode estar vazio")
             msg.setIcon(QMessageBox.Critical)
             msg.exec_()
+            
+    def alterar_estoque(self):
+        campos = { 'patrimonio':self.txt_patrimonio_3.text(),'uf':self.ddl_uf_3.currentText(),'tipo':self.txt_tipo_3.text(), 'quantidade':self.txt_quantidade.text(), 
+        'modelo':self.txt_modelo_3.text(), 'marca':self.txt_marca_3.text(), 'descricao':self.txt_descricao_3.text(), 'destino':self.txt_destino.text() }
+        
+        conn = pymysql.connect(host='satelpjceara.com',port=3306, user='satelp03_marcosh' ,password='12345678', db='satelp03_bd_github')
+        cur = conn.cursor()
+        
+        msg = QMessageBox()
+        msg.setWindowTitle("WARNING")
+        msg.setText("DESEJA SALVAR AS ALTERAÇÕES?")
+        msg.setIcon(QMessageBox.Warning)
+        msg.setStandardButtons(QMessageBox.Yes | QMessageBox.Cancel)
+        msg.setDefaultButton(QMessageBox.Cancel)
+        executar = msg.exec_()
+        
+        if f.se_vazio( campos ) == False:
+            try:
+                if executar == msg.Yes:
+                    query_update = f""" UPDATE satelp03_bd_github.tb_base_estoque SET uf = '{ campos[ 'uf' ] }', tipo = '{ campos [ 'tipo' ] }', quantidade = '{ campos [ 'quantidade' ] }', 
+                    modelo = '{ campos[ 'modelo' ] }', marca = '{ campos[ 'marca' ] }', descricao = '{ campos[ 'descricao' ] }', destino = '{ campos[ 'destino' ] }' 
+                    WHERE patrimonio = { campos['patrimonio'] }"""
 
+                    cur.execute( query_update )
+                    conn.commit()
+                    conn.close()
+                    
+                    msg = QMessageBox()
+                    msg.setWindowTitle("AVISO")
+                    msg.setText("Alterações feitas com sucesso!")
+                    msg.setIcon(QMessageBox.Information)
+                    msg.exec_()
+                    
+            except Exception as erro:
+                print(erro)
+        
+        else:
+            msg = QMessageBox()
+            msg.setWindowTitle("FALHA")
+            msg.setText("Não foi possivel fazer as alterações!")
+            msg.setInformativeText("Nenhum campo pode estar vazio")
+            msg.setIcon(QMessageBox.Critical)
+            msg.exec_()
+     
+    def deletar_estoque(self):
+        campos = { 'patrimonio':self.txt_patrimonio_3.text(),'uf':self.ddl_uf_3.currentText(),'tipo':self.txt_tipo_3.text(), 'quantidade':self.txt_quantidade.text(), 
+        'modelo':self.txt_modelo_3.text(), 'marca':self.txt_marca_3.text(), 'descricao':self.txt_descricao_3.text(), 'destino':self.txt_destino.text() }
+        
+        conn = pymysql.connect(host='satelpjceara.com',port=3306, user='satelp03_marcosh' ,password='12345678', db='satelp03_bd_github')
+        cur = conn.cursor()
+        
+        query_delete = f"""DELETE FROM satelp03_bd_github.tb_base_estoque WHERE patrimonio = { campos[ 'patrimonio' ] }"""
+        
+        msg = QMessageBox()
+        msg.setWindowTitle("WARNING")
+        msg.setText("ESTÁ AÇÃO É DEFINITIVA")
+        msg.setInformativeText("Deseja continuar?")
+        msg.setIcon(QMessageBox.Warning)
+        msg.setStandardButtons(QMessageBox.Yes | QMessageBox.Cancel)
+        msg.setDefaultButton(QMessageBox.Cancel)
+        executar = msg.exec_()
+        
+        if f.se_vazio( campos ) == False:
+            try:
+                if executar == msg.Yes:
+                    cur.execute( query_delete )
+                    conn.commit()
+                    conn.close()
+
+                    msg = QMessageBox()
+                    msg.setWindowTitle("AVISO")
+                    msg.setText("Dados apagados com sucesso!")
+                    msg.setIcon(QMessageBox.Information)
+                    msg.exec_()
+                
+            except Exception as erro:
+                print(erro)
+        
+        else:
+            msg = QMessageBox()
+            msg.setWindowTitle("FALHA")
+            msg.setText("Impossivel apagar os dados!")
+            msg.setIcon(QMessageBox.Critical)
+            msg.exec_() 
+            
+    def limpar_estoque(self):
+        campos = [ self.txt_patrimonio_3, self.txt_tipo_3, self.txt_quantidade, self.txt_modelo_3, self.txt_marca_3, self.txt_descricao_3, self.txt_destino ]
+        
+        for item in campos:
+            item.clear()   
+    
+    def mostrar_estoque(self):
+        try:
+            conn = pymysql.connect(host='satelpjceara.com',port=3306, user='satelp03_marcosh'  ,password='12345678', db='satelp03_bd_github')
+            
+            query = f"""SELECT patrimonio, uf, tipo, quantidade, modelo, marca, descricao, destino FROM satelp03_bd_github.tb_base_estoque"""
+            tabela = pd.read_sql(query, conn)
+            
+            if (tabela.empty == True):
+                msg = QMessageBox()
+                msg.setWindowTitle('AVISO')
+                msg.setText('Impossivel carregar dados!')
+                msg.setInformativeText('Não há dados registrados')
+                msg.setIcon(QMessageBox.Critical)
+                msg.exec_()
+            
+            else:
+                linha = 0
+                
+                for linha_indice in ( tabela.index ):
+                    coluna = 0
+                    
+                    for item in tabela:  
+                        self.x = tabela.iloc[ linha,coluna ] 
+                        self.tabela_estoque.setItem( linha, coluna, QTableWidgetItem( str( self.x ) ) )
+                        coluna = coluna +1
+                        
+                    linha = linha + 1
+        
+        except Exception as erro:
+            print(erro)
+
+            
 def main():
     app = QApplication(sys.argv)
     form = Janela()
