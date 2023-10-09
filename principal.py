@@ -1,15 +1,21 @@
+import os
+import sys 
+
 from PyQt5 import QtCore, QtGui, QtWidgets
 from PyQt5.QtWidgets import QApplication, QMessageBox, QTableWidgetItem, QToolButton, QMainWindow, QLabel
-from reportlab.pdfgen import canvas
+
 from reportlab.platypus import Paragraph
+from reportlab.pdfgen import canvas
+
 from pdf2image import convert_from_path
-import sys
+
+import pymysql
+import pandas as pd
+import funcoes as f
+
 import base
 import base2
-import pandas as pd
-import pymysql
-import funcoes as f
-import os
+
 import cv2
      
 class Janela2(QtWidgets.QMainWindow, base2.Ui_SegundaJanela):
@@ -83,7 +89,7 @@ class Janela(QtWidgets.QMainWindow, base.Ui_PrimeiraJanela):
         self.btn_apagar.clicked.connect(self.deletar_pc)
         self.btn_limpar_detalhes.clicked.connect(self.limpar_pc)
         
-        self.btn_preview .clicked.connect(self.gerar_pdf)
+        self.btn_gerar_doc.clicked.connect(self.gerar_pdf)
         
         self.btn_buscar_detalhes_2.clicked.connect(self.detalhes_equipamentos)
         self.btn_cadastrar_2.clicked.connect(self.cadastrar_equipamentos)
@@ -132,28 +138,30 @@ class Janela(QtWidgets.QMainWindow, base.Ui_PrimeiraJanela):
                     descricao = list( tabela[ 'descricao' ] )[0]
                     
                     uf = list( tabela[ 'uf' ] )[0]
-                    if list( tabela[ 'uf' ] )[0] == 'RJ':
+                    indexUf = 0
+                    if list( tabela[ 'uf' ] )[0] == 'Rio de Janeiro':
                         indexUf = 0
-                    if list( tabela[ 'uf' ] )[0] == 'RJ - NITEROI':
+                    if list( tabela[ 'uf' ] )[0] == 'Rio de Janeiro - Niterói':
                         indexUf = 1
-                    if list( tabela[ 'uf' ] )[0] == 'SP':
+                    if list( tabela[ 'uf' ] )[0] == 'São Paulo':
                         indexUf = 2    
-                    if list( tabela[ 'uf' ] )[0] == 'GO':
+                    if list( tabela[ 'uf' ] )[0] == 'Goiás':
                         indexUf = 3
-                    if list( tabela[ 'uf' ] )[0] == 'AC':
+                    if list( tabela[ 'uf' ] )[0] == 'Acre':
                         indexUf = 4
-                    if list( tabela[ 'uf' ] )[0] == 'RO':
+                    if list( tabela[ 'uf' ] )[0] == 'Rondônia':
                         indexUf = 5
-                    if list( tabela[ 'uf' ] )[0] == 'MG':
+                    if list( tabela[ 'uf' ] )[0] == 'Minas Gerais':
                         indexUf = 6
-                    if list( tabela[ 'uf' ] )[0] == 'CE':
+                    if list( tabela[ 'uf' ] )[0] == 'Ceará':
                         indexUf = 7
-                    if list( tabela[ 'uf' ] )[0] == 'PE':
+                    if list( tabela[ 'uf' ] )[0] == 'Pernambuco':
                         indexUf = 8
                            
                     id_usuario = list( tabela[ 'id_usuario' ] )[0]
                 
                     setor = list( tabela['setor'] )[0]
+                    indexSetor = 0
                     if list( tabela[ 'setor' ] )[0] == 'Analise de Projetos':
                         indexSetor =  0 
                     if list( tabela[ 'setor' ] )[0] == 'Projetos AT':
@@ -186,18 +194,20 @@ class Janela(QtWidgets.QMainWindow, base.Ui_PrimeiraJanela):
                     status = list( tabela [ 'status' ] )[0]
                     if list( tabela [ 'status' ] )[0] == 'Ativo':
                         indexStatus = 0
-                    if list( tabela [ 'status' ] )[0] == 'Inativo':
+                    if list( tabela [ 'status' ] )[0] == 'Desconhecido':
                         indexStatus = 1
                         
                     condicoes = list( tabela [ 'condicoes' ] )[0]
                     
                     alugado = list( tabela [ 'alugado' ] )[0]
+                    indexAlugado = 0
                     if list( tabela [ 'alugado' ] )[0] == 'Sim':
                         indexAlugado = 0
                     if list( tabela [ 'alugado' ] )[0] == 'Não':
                         indexAlugado = 1
                         
                     ssd_hdd = list( tabela[ 'ssd_hdd' ] )[0]
+                    indexSSD = 0
                     if list( tabela[ 'ssd_hdd' ] )[0] == 'SSD':
                         indexSSD = 0
                     if list( tabela[ 'ssd_hdd' ] )[0] == 'HDD':
@@ -209,12 +219,14 @@ class Janela(QtWidgets.QMainWindow, base.Ui_PrimeiraJanela):
                     anydesk = list( tabela[ 'anydesk' ] )[0]
                     
                     officie = list( tabela[ 'officie' ] )[0]
+                    indexOfficie = 0
                     if list( tabela[ 'officie' ] )[0] == 'Sim':
                         indexOfficie = 0
                     if list( tabela[ 'officie' ] )[0] == 'Não':
                         indexOfficie = 1
-                        
+      
                     tipo_officie = list( tabela[ 'tipo_officie' ] )[0]
+                    indexTipoOfficie = 0
                     if list( tabela[ 'tipo_officie' ] )[0] == '365':
                         indexTipoOfficie = 0
                     if list( tabela[ 'tipo_officie' ] )[0] == 'Home & Business':
@@ -438,208 +450,283 @@ class Janela(QtWidgets.QMainWindow, base.Ui_PrimeiraJanela):
                 
                 filtro = int( self.txt_patrimonio.text() )
                 
-                query = f"""SELECT  t2.name, t1.setor, t1.patrimonio, t1.modelo, t1.descricao, t1.processador, t1.memoria, t1.n_modelo, t1.n_serie, t1.ssd_hdd, t1.marca 
-                FROM satelp03_bd_github.tb_base_patrimonio AS t1 LEFT JOIN satelp03_bd_github.users as t2 ON t1.id_usuario  = t2.id WHERE patrimonio = { filtro }"""
+                query = f"""SELECT  t1.patrimonio, t1.uf, t1.modelo, t1.processador, t1.memoria, t1.n_modelo, t1.n_serie
+                FROM satelp03_bd_github.tb_base_patrimonio AS t1 LEFT JOIN satelp03_bd_github.users as t2 ON t1.id_usuario = t2.id WHERE patrimonio = { filtro }"""
                 
                 tabela = pd.read_sql(query, conn)
                 print(tabela)
                 
-                name = list( tabela[ 'name' ] )[0]
-                setor = list( tabela[ 'setor' ] )[0]
-                
                 patrimonio = list( tabela[ 'patrimonio' ] )[0]
                 
-                marca = list( tabela[ 'marca' ] )[0]
-                descricao = list( tabela[ 'descricao' ] )[0]
-                memoria = list( tabela[ 'memoria' ] )[0]
-                ssd_hdd = list( tabela[ 'ssd_hdd' ] )[0]
-                
-                quantidade = '1'
+                # name = list( tabela[ 'name' ] )[0]
+                # setor = list( tabela[ 'setor' ] )[0]
                 
                 modelo = list( tabela[ 'modelo' ] )[0]
                 processador = list( tabela[ 'processador' ] )[0]
-                n_modelo = list( tabela[ 'n_modelo' ] )[0]
+                memoria = list( tabela[ 'memoria' ] )[0]
+                
+                quantidade = '1'
+                
+                # marca = list( tabela[ 'marca' ] )[0]
+                # descricao = list( tabela[ 'descricao' ] )[0]
+                # ssd_hdd = list( tabela[ 'ssd_hdd' ] )[0]
+                
                 n_serie = list( tabela[ 'n_serie' ] )[0]
+                n_modelo = list( tabela[ 'n_modelo' ] )[0]
+                
+                uf = list( tabela['uf'] )[0]
+                # if (uf == 'RJ'):
+                #     uf = "Rio de Janeiro"
+                    
+                # if (uf == 'SP'):
+                #     uf = "São Paulo"
+                    
+                # if (uf == 'GO'):
+                #     uf = "Goiás"
+                    
+                # if (uf == 'AC'):
+                #     uf = "Acre"
+    
+                # if (uf == 'MG'):
+                #     uf == "Minas Gerais"
+                    
+                # if (uf == 'RO'):
+                #     uf = "Rondônia"
+                    
+                # if (uf == 'CE'):
+                #     uf == "Ceará"
+                    
+                # if (uf == 'PE'):
+                #     uf == "Pernambuco"
                 
                 pdf = canvas.Canvas(f"termos/{ patrimonio }_Termo_Responsabilidade.pdf")
                 
                 pdf.setTitle(f"patrimonio { str( patrimonio ) }")
-                pdf.drawInlineImage('imagens/satel.png', 230, 740, 120, 120, preserveAspectRatio= True)
-                pdf.setFont('Helvetica-Bold', 15)
-                pdf.drawCentredString(290, 750, "Termo de Responsabilidade de Uso")
-                pdf.setFont('Helvetica-Bold', 13)
-                pdf.drawCentredString(290, 730, "SAT-RG-39")
+                
+                pdf.drawInlineImage('imagens/cabecalho.png', 95, 720, 410, 120, preserveAspectRatio= True)
+                
+                if (self.check_pj.isChecked()):
+                    id = Paragraph('Prestador de Serviços')
+                    id.wrapOn(pdf, 400, 100)
+                    id.drawOn(pdf, 100, 731)
 
-                id = Paragraph('IDENTIFICAÇÃO DO COLABORADOR')
-                id.wrapOn(pdf, 400, 100)
-                id.drawOn(pdf, 100, 695)
-                nome = Paragraph('Nome: ' + name)
-                nome.wrapOn(pdf, 400, 100)
-                nome.drawOn(pdf, 100, 670)
-                setor = Paragraph('Setor: ' + setor)
-                setor.wrapOn(pdf, 400, 100)
-                setor.drawOn(pdf, 100, 655)
-                n_id = Paragraph('N° de Identidade: ')
-                n_id.wrapOn(pdf, 400, 100)
-                n_id.drawOn(pdf, 100, 640)
+                    nome = Paragraph('Razão Social: _____________________________________________________')
+                    nome.wrapOn(pdf, 400, 100)
+                    nome.drawOn(pdf, 100, 715)
 
-                pdf.drawInlineImage('imagens/tabela patrimonio.png', 90, 380, 400, 400, preserveAspectRatio= True)
+                    n_id = Paragraph('CNPJ: _____________________________________________________')
+                    n_id.wrapOn(pdf, 400, 100)
+                    n_id.drawOn(pdf, 100, 699)
+
+                    setor = Paragraph('Atividade: ')
+                    setor.wrapOn(pdf, 400, 100)
+                    setor.drawOn(pdf, 100, 682)
+
+                    pdf.drawInlineImage('imagens/check box pj.png', 150, 657, 100, 60, preserveAspectRatio= True)
+                    
+                else:
+                    id = Paragraph('Identificação do Colaborador')
+                    id.wrapOn(pdf, 400, 100)
+                    id.drawOn(pdf, 100, 730)
+                    
+                    nome = Paragraph('Nome:_______________________________________________________')
+                    nome.wrapOn(pdf, 400, 100)
+                    nome.drawOn(pdf, 100, 715)
+
+                    cargo = Paragraph('Cargo:_______________________________________________________')
+                    cargo.wrapOn(pdf, 400, 100)
+                    cargo.drawOn(pdf, 100, 700)
+                    
+                    n_id = Paragraph('N° de Identidade:_______________________________________________')
+                    n_id.wrapOn(pdf, 400, 100)
+                    n_id.drawOn(pdf, 100, 685)
+
+                pdf.drawInlineImage('imagens/tabela.png', 94, 575, 410, 120, preserveAspectRatio= True)
 
                 p = Paragraph( str( patrimonio ) )
                 p.wrapOn(pdf, 400, 100)
-                p.drawOn(pdf, 117, 591)
-                d = Paragraph( marca + ' / ' + descricao +  ' / ' + memoria + ' / ' +  ssd_hdd ) 
+                p.drawOn(pdf, 130, 642)
+                
+                d = Paragraph(f"{modelo}, {processador}. {memoria}GB") #variaveis (modelo + processador + memoria )
                 d.wrapOn(pdf, 400, 100)
-                d.drawOn(pdf, 165, 591)
-                d2 = Paragraph( modelo + ' / ' + processador + ' / ' +  n_serie + ' / ' +  n_modelo ) 
+                d.drawOn(pdf, 190, 642)
+                
+                q3 = Paragraph(f"{quantidade}") #quantidade
+                q3.wrapOn(pdf, 400, 100)
+                q3.drawOn(pdf, 475, 641)
+
+                d2 = Paragraph('SSD: _______GB, HD: _______TB') #variaveis (ssd + hd (250gb + 1TB))
                 d2.wrapOn(pdf, 400, 100)
-                d2.drawOn(pdf, 165, 575)
-                q = Paragraph(quantidade)
+                d2.drawOn(pdf, 190, 629)
+                
+                q = Paragraph(f"S/N: {n_serie}") #serie
                 q.wrapOn(pdf, 400, 100)
-                q.drawOn(pdf, 467, 591)
-
-                pdf.line(80, 520, 500, 520)
-
+                q.drawOn(pdf, 190, 616)
+                
+                q2 = Paragraph(f"Model: {n_modelo}") #modelo
+                q2.wrapOn(pdf, 400, 100)
+                q2.drawOn(pdf, 190, 603)
+                
                 p0 = Paragraph(f"""Recebi da empresa SATEL – SERVIÇOS AUXILIARES DE TELECOMUNICAÇÕES DO BRASIL LTDA, CNPJ Nº 16.857.533/0001-24, a título de empréstimo, para uso exclusivo, 
-                            conforme determinado em lei, os equipamentos especificados neste termo de responsabilidade. Comprometendo-me a mantê-los em perfeito estado de conservação, 
-                            ficando ciente de que: """)
+                                conforme determinado em lei, os equipamentos especificados neste termo de responsabilidade. Comprometendo-me a mantê-los em perfeito estado de conservação, 
+                                ficando ciente de que: """)
                 p0.wrapOn(pdf, 400, 100)
-                p0.drawOn(pdf, 95, 445)
+                p0.drawOn(pdf, 100, 530)
                 p1 = Paragraph(f"""1- Se o equipamento for danificado ou inutilizado por emprego inadequado, mau uso, negligência ou extravio, a empresa me fornecerá novo equipamento e cobrará o valor 
                             de um equipamento da mesma marca ou equivalente ao da praça;""")
                 p1.wrapOn(pdf, 400, 100)
-                p1.drawOn(pdf, 95, 400)
+                p1.drawOn(pdf, 100, 490)
                 p2 = Paragraph("2- Em caso de perda, dano, furto, inutilização ou extravio do equipamento, deverei comunicar imediatamente ao setor competente;")
                 p2.wrapOn(pdf, 400, 100)
-                p2.drawOn(pdf, 95, 370)
+                p2.drawOn(pdf, 100, 465)
                 p3 = Paragraph(f"""3- Terminando os serviços ou em caso de rescisão do contrato de trabalho, devolverei o equipamento completo e em perfeito estado de conservação, considerando-se o tempo 
                             do uso do mesmo (tempo de vida útil), ao setor competente;""")
                 p3.wrapOn(pdf, 400, 100)
-                p3.drawOn(pdf, 95, 330)
+                p3.drawOn(pdf, 100, 430)
                 p4 = Paragraph('4- Estando os equipamentos em minha posse, estarei sujeito a inspeções sem prévio aviso.')
                 p4.wrapOn(pdf, 400, 100)
-                p4.drawOn(pdf, 95, 300)
-                p5 = Paragraph('Rio de Janeiro, ____ de ___________ de 20____.')
+                p4.drawOn(pdf, 100, 405)
+                p15 = Paragraph(f"""5 - Declaro que tenho conhecimento, bem como aceito, que a empresa e seus prepostos possam gravar as ligações realizadas pelo  aparelho de telefonia móvel 
+                ora objeto desta cessão, bem como as imagens e documentos que estejam salvas,   licitamente como bem lhe couber, para segurança da empresa e dos funcionários 
+                em cumprimento das políticas internas autorizando desde já sua utilização, sem nada a opor, para nada reclamar em juízo ou fora dele.""")
+                p15.wrapOn(pdf, 400, 100)
+                p15.drawOn(pdf, 100, 333)      
+
+                p5 = Paragraph(f"{uf} , ____ de ___________ de 20____.") #variável estado
                 p5.wrapOn(pdf, 400, 100)
-                p5.drawOn(pdf, 100, 272)
+                p5.drawOn(pdf, 100, 300)
+                
                 p6 = Paragraph('Assinatura:____________________________________________________')
                 p6.wrapOn(pdf, 400, 100)
-                p6.drawOn(pdf, 100, 250)
-
-                pdf.line(80, 230, 500, 230)
+                p6.drawOn(pdf, 100, 280)
+                
+                pdf.line(95, 260, 500, 260)
 
                 p7 = Paragraph('Data devolução: ____/____/____')
                 p7.wrapOn(pdf, 400, 100)
-                p7.drawOn(pdf, 100, 202)
+                p7.drawOn(pdf, 220, 235)
+                
                 p8 = Paragraph('Assinatura:____________________________________________________')
                 p8.wrapOn(pdf, 400, 100)
-                p8.drawOn(pdf, 100, 180)
-
-                pdf.drawInlineImage('imagens/check box.png', 85, 97, 50, 60, preserveAspectRatio= True)
+                p8.drawOn(pdf, 100, 210)
+                
+                pdf.drawInlineImage('imagens/check box.png', 92, 130, 50, 60, preserveAspectRatio=True)
 
                 p9 = Paragraph('Em perfeito estado')
                 p9.wrapOn(pdf, 400, 100)
-                p9.drawOn(pdf, 125, 145)
+                p9.drawOn(pdf, 142, 175)
                 p10 = Paragraph('Apresentando defeito')
                 p10.wrapOn(pdf, 400, 100)
-                p10.drawOn(pdf, 125, 122)
+                p10.drawOn(pdf, 142, 155)
                 p11 = Paragraph('Faltando peças ou acessórios')
                 p11.wrapOn(pdf, 400, 100)
-                p11.drawOn(pdf, 125, 98)
+                p11.drawOn(pdf, 142, 134)
                 
                 p12 = Paragraph('Responsável pelo recebimento')
                 p12.wrapOn(pdf, 400, 100)
-                p12.drawOn(pdf, 100, 62)
+                p12.drawOn(pdf, 220, 95)
+                
                 p13 = Paragraph('Nome:_______________________________________________________')
                 p13.wrapOn(pdf, 400, 100)
-                p13.drawOn(pdf, 100, 38)
+                p13.drawOn(pdf, 100, 65)
                 p14 = Paragraph('Assinatura:____________________________________________________')
                 p14.wrapOn(pdf, 400, 100)
-                p14.drawOn(pdf, 100, 15)
+                p14.drawOn(pdf, 100, 40)
                 
-                pdf.save()
+                # pdf.save()
                 
                 msg = QMessageBox()
                 msg.setWindowTitle("AVISO")
-                msg.setText('Deseja visualizar o pdf?')
+                msg.setText('Deseja salvar o pdf?')
                 msg.setIcon(QMessageBox.Information)
-                msg.setStandardButtons(QMessageBox.Yes | QMessageBox.Cancel | QMessageBox.Save)
+                msg.setStandardButtons(QMessageBox.Yes | QMessageBox.Cancel)
                 msg.setDefaultButton(QMessageBox.Cancel)
                 executar = msg.exec_()
 
                 if executar == msg.Yes:
                     patrimonio_yes = self.txt_patrimonio.text()
                     
-                    if patrimonio_yes != '' or patrimonio_yes != None:
-                
-                        poppler_path = "C:\\Users\\Administrador Satel\\Desktop\\giulia\\Release-23.01.0-0\\poppler-23.01.0\\Library\\bin"
-                    
-                        pdf_path = os.getcwd() + f"\\termos\\{ patrimonio_yes }_Termo_Responsabilidade.pdf"
-
-                        paginas = convert_from_path(pdf_path=pdf_path, poppler_path=poppler_path)
-                        
-                        pasta_salvamento = os.getcwd() + '\preview'
-
-                        c=1
-                        for pagina in paginas:
-                            nome_imagem = f"{ patrimonio_yes }_Termo_Responsabilidade.png"
-                            
-                            pagina.save( os.path.join( pasta_salvamento, nome_imagem ), "PNG" )
-                            c+=1
-                        
-                        imagem = cv2.imread(f"preview/{ patrimonio_yes }_Termo_Responsabilidade.png")
-                        
-                        down_width = 300
-                        down_height = 360
-                        down_points = (down_width, down_height)
-                        resized_down = cv2.resize(imagem, down_points, interpolation= cv2.INTER_LINEAR)
-                    
-                        up_width = 600
-                        up_height = 720
-                        up_points = (up_width, up_height)
-                        resized_up = cv2.resize(imagem, up_points, interpolation= cv2.INTER_LINEAR)
-                        
-                        cv2.imshow('Preview', resized_down)
-                        cv2.imshow('Preview', resized_up)
-                        
-                        arquivo_png = f"preview/{ patrimonio_yes }_Termo_Responsabilidade.png"
-                        arquivo_pdf = f"termos/{ patrimonio_yes }_Termo_Responsabilidade.pdf"
-                        
-                        os.remove(arquivo_png)
-                        os.remove(arquivo_pdf)
+                    if patrimonio_yes != '' or patrimonio_yes != None:      
+                        pdf.save()
                         
                         msg = QMessageBox()
                         msg.setWindowTitle("AVISO")
-                        msg.setText("Deseja salvar o arquivo?")
+                        msg.setText('Documento salvo com sucesso!')
+                        msg.setInformativeText('Termo disponivél na pasta "termos"')
                         msg.setIcon(QMessageBox.Information)
-                        msg.setStandardButtons(QMessageBox.Yes | QMessageBox.Cancel)
-                        msg.setDefaultButton(QMessageBox.Yes)
                         executar = msg.exec_()
                         
-                        if executar == msg.Yes:
-                            pdf.save()
+                #         #poppler_path = "C:\\Users\\Administrador Satel\\Desktop\\giulia\\Release-23.01.0-0\\poppler-23.01.0\\Library\\bin"
+                #         poppler_path = "C:\\Users\\Administrador Satel\\Downloads\\Release-23.08.0-0\\poppler-23.08.0\\Library\\bin"
+                        
+                #         pdf_path = os.getcwd() + f"\\termos\\{ patrimonio_yes }_Termo_Responsabilidade.pdf"
+
+                #         paginas = convert_from_path(pdf_path=pdf_path, poppler_path=poppler_path)
+                        
+                #         pasta_salvamento = os.getcwd() + '\preview'
+
+                #         c=1
+                #         for pagina in paginas:
+                #             nome_imagem = f"{ patrimonio_yes }_Termo_Responsabilidade.png"
+                            
+                #             pagina.save( os.path.join( pasta_salvamento, nome_imagem ), "PNG" )
+                #             c+=1
+                        
+                #         imagem = cv2.imread(f"preview/{ patrimonio_yes }_Termo_Responsabilidade.png")
+                        
+                #         down_width = 300
+                #         down_height = 360
+                #         down_points = (down_width, down_height)
+                #         resized_down = cv2.resize(imagem, down_points, interpolation= cv2.INTER_LINEAR)
+                    
+                #         up_width = 600
+                #         up_height = 720
+                #         up_points = (up_width, up_height)
+                #         resized_up = cv2.resize(imagem, up_points, interpolation= cv2.INTER_LINEAR)
+                        
+                #         cv2.imshow('Preview', resized_down)
+                #         cv2.imshow('Preview', resized_up)
+                        
+                #         arquivo_png = f"preview/{ patrimonio_yes }_Termo_Responsabilidade.png"
+                #         arquivo_pdf = f"termos/{ patrimonio_yes }_Termo_Responsabilidade.pdf"
+                        
+                #         os.remove(arquivo_png)
+                #         os.remove(arquivo_pdf)
+                        
+                #         msg = QMessageBox()
+                #         msg.setWindowTitle("AVISO")
+                #         msg.setText("Deseja salvar o arquivo?")
+                #         msg.setIcon(QMessageBox.Information)
+                #         msg.setStandardButtons(QMessageBox.Yes | QMessageBox.Cancel)
+                #         msg.setDefaultButton(QMessageBox.Yes)
+                #         executar = msg.exec_()
+                        
+                #         pdf2 = pdf.save()
+                        
+                #         if executar == msg.Yes:
+                #             pdf2
                         
                 if executar == msg.Cancel:
                     patrimonio_cancel = self.txt_patrimonio.text()
                     
                     arquivo_pdf = f"termos/{ patrimonio_cancel }_Termo_Responsabilidade.pdf"
-                    arquivo_png = f"preview/{ patrimonio_cancel }_Termo_Responsabilidade.png"
+                    #arquivo_png = f"preview/{ patrimonio_cancel }_Termo_Responsabilidade.png"
                     
                     os.remove( arquivo_pdf )
-                    os.remove( arquivo_png )
+                    #os.remove( arquivo_png )
                     
-                if executar == msg.Save:
-                    patrimonio_save = self.txt_patrimonio.text()
+                # if executar == msg.Save:
+                #     patrimonio_save = self.txt_patrimonio.text()
                     
-                    arquivo_png = f"preview/{ patrimonio_save }_Termo_Responsabilidade.png"
+                #     arquivo_png = f"preview/{ patrimonio_save }_Termo_Responsabilidade.png"
                     
-                    os.remove( arquivo_png )
+                #     os.remove( arquivo_png )
                     
-                    msg = QMessageBox()
-                    msg.setWindowTitle('AVISO')
-                    msg.setText('Arquivo salvo com sucesso!')
-                    msg.setIcon(QMessageBox.Informative)  
-                    msg.exec_()
+                #     msg = QMessageBox()
+                #     msg.setWindowTitle('AVISO')
+                #     msg.setText('Arquivo salvo com sucesso!')
+                #     msg.setIcon(QMessageBox.Informative)  
+                #     msg.exec_()
                                 
             else:
                 msg = QMessageBox()
